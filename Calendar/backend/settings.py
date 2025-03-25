@@ -20,7 +20,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'wq&$17(s4n3eiby%ci%6i1$d1nigl-s46+i(j#iycf-8e0bi$0'
 SECRET_KEY = 'django-insecure-9)ju^h%z@8mg2l+f^j#807i8dwb43wt9ql$g4lds3t1+i^d)2m'
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -81,19 +80,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'calendardb.sqlite3',
-        # 'USER': 'miku',
-        # 'PASSWORD': 'miku39',
-        # 'HOST': '127.0.0.1',
     }
 }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'test_db.sqlite3',
-#     }
-# }
-
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
