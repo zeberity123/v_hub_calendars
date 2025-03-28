@@ -9,6 +9,8 @@ body {
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
+  background: white url("../bg_images/bg_miku3.jpg") no-repeat;
+  background-size: cover;
   font-family: "roboto", 'NotoSansKR', "Helvetica Neue", Helvetica, Arial, "맑은 고딕", malgun gothic, "돋움", Dotum, sans-serif, "Apple Color Emoji", "Noto Color Emoji";
   color: #263747; }
 
@@ -22,7 +24,7 @@ a:hover {
   border-right: 1px solid #D7E2EB;
   border-left: 1px solid #D7E2EB;
   border-radius: 12px;
-  background: #fff; }
+  background: #fff; opacity: 0.9; }
 
 .calendar-header {
   display: flex;
@@ -131,7 +133,7 @@ a:hover {
   grid-gap: 0;
   border-bottom: 1px solid #D7E2EB; }
   .week:hover {
-    cusor: pointer; }
+    cursor: pointer; }
   .week .day {
     border-right: 1px solid #d7e2eb;
     display: contents; }
@@ -190,7 +192,7 @@ a:hover {
   overflow: auto;
   border-bottom: 1px solid #D7E2EB; }
   .daily-calendar:hover {
-    cusor: pointer; }
+    cursor: pointer; }
   .daily-calendar .event, .daily-calendar .event-consecutive, .daily-calendar .event-repeated {
     margin-top: 4px; }
 
