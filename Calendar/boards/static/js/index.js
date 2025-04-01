@@ -107,7 +107,7 @@ $(document).ready(async function() {
         }
         // 배열형태 cal를 string형태로 변환
         cal = cal.reduce(function(a, b) {
-            return a.concat(b);
+            return a.concat(b); 
         }, []).join('');
         // 일정 데이터를 딕셔너리 형태로 저장, 키는 해당날짜 0000-00-00 
         var d_startdate = {}
@@ -117,12 +117,7 @@ $(document).ready(async function() {
             const e_day_0 = res.end_day.split('-')
             const e_day = date_list[date_list.length - 1].split('-')
             // 연속일정인지 단일일정인지 판단
-            var judge
-            if (res.start_day === res.end_day) {
-                judge = false
-            } else {
-                judge = true
-            }
+            var judge = (res.start_day === res.end_day) ? false : true;
             // 각각 해당 날짜 저장
             const diff_d0 = new Date(s_day_0[2], s_day_0[0]-1, s_day_0[1])
             const diff_d1 = new Date(s_day[2], s_day[0]-1, s_day[1])
@@ -131,25 +126,61 @@ $(document).ready(async function() {
             
             const diff = Math.floor((diff_d2.getTime() - diff_d0.getTime()) / 1000 / 60 / 60 / 24)
             const diff_v = Math.floor((diff_d2.getTime() - diff_d1.getTime()) / 1000 / 60 / 60 / 24)
-            // DB에 있는 모든 일정 저장
+
+            // Compute subtasks summary
+            var totalSubtasks = res.subtasks ? res.subtasks.length : 0;
+            var completedSubtasks = 0;
+            if (res.subtasks) {
+                completedSubtasks = res.subtasks.filter(function(st) { return st.completed; }).length;
+            }
+            var summary = " (" + completedSubtasks + "/" + totalSubtasks + ")";
+            var titleWithSummary = res.title + summary;
+
+            // DB에 있는 모든 일정 저장 (include color at the end)
             if (res.start_day in d_startdate) {
-                d_startdate[res.start_day].push([diff+1, res.title, diff_d0.getDay(), false, `${diff_d0.getFullYear() + '년' + ' ' + (diff_d0.getMonth()+1) + '월' + ' ' + diff_d0.getDate() + '일'}`, `${diff_d2.getFullYear() + '년' + ' ' + (diff_d2.getMonth()+1) + '월' + ' ' + diff_d2.getDate() + '일'}`, res.start_time, res.end_time, res.content, judge, res.id])
+                d_startdate[res.start_day].push([
+                    diff+1, 
+                    titleWithSummary, 
+                    diff_d0.getDay(), 
+                    false, 
+                    `${diff_d0.getFullYear()}년 ${diff_d0.getMonth()+1}월 ${diff_d0.getDate()}일`, 
+                    `${diff_d2.getFullYear()}년 ${diff_d2.getMonth()+1}월 ${diff_d2.getDate()}일`, 
+                    res.start_time, 
+                    res.end_time, 
+                    res.content, 
+                    judge, 
+                    res.id,
+                    res.color
+                ]);
             } else {
-                d_startdate[res.start_day] = [[diff+1, res.title, diff_d0.getDay(), false, `${diff_d0.getFullYear() + '년' + ' ' + (diff_d0.getMonth()+1) + '월' + ' ' + diff_d0.getDate() + '일'}`, `${diff_d2.getFullYear() + '년' + ' ' + (diff_d2.getMonth()+1) + '월' + ' ' + diff_d2.getDate() + '일'}`, res.start_time, res.end_time, res.content, judge, res.id]]
+                d_startdate[res.start_day] = [[
+                    diff+1, 
+                    titleWithSummary, 
+                    diff_d0.getDay(), 
+                    false, 
+                    `${diff_d0.getFullYear()}년 ${diff_d0.getMonth()+1}월 ${diff_d0.getDate()}일`, 
+                    `${diff_d2.getFullYear()}년 ${diff_d2.getMonth()+1}월 ${diff_d2.getDate()}일`, 
+                    res.start_time, 
+                    res.end_time, 
+                    res.content, 
+                    judge, 
+                    res.id,
+                    res.color
+                ]];
             }
 
             // date_list에 시작날짜가 없어서 따로 저장하여 달력에 띄우기 위한 작업
             if (!date_list.includes(res.start_day) && date_list.includes(res.end_day)) {
                 if (date_list[0] in d_startdate) {
-                    d_startdate[date_list[0]].push([diff_v+1, res.title, diff_d1.getDay(), true, `${diff_d0.getFullYear() + '년' + ' ' + (diff_d0.getMonth()+1) + '월' + ' ' + diff_d0.getDate() + '일'}`, `${diff_d2.getFullYear() + '년' + ' ' + (diff_d2.getMonth()+1) + '월' + ' ' + diff_d2.getDate() + '일'}`, res.start_time, res.end_time, res.content, true, res.id])
+                    d_startdate[date_list[0]].push([diff_v+1, res.title, diff_d1.getDay(), true, `${diff_d0.getFullYear() + '년' + ' ' + (diff_d0.getMonth()+1) + '월' + ' ' + diff_d0.getDate() + '일'}`, `${diff_d2.getFullYear() + '년' + ' ' + (diff_d2.getMonth()+1) + '월' + ' ' + diff_d2.getDate() + '일'}`, res.start_time, res.end_time, res.content, true, res.id, res.color])
                 } else {
-                    d_startdate[date_list[0]] = [[diff_v+1, res.title, diff_d1.getDay(), true, `${diff_d0.getFullYear() + '년' + ' ' + (diff_d0.getMonth()+1) + '월' + ' ' + diff_d0.getDate() + '일'}`, `${diff_d2.getFullYear() + '년' + ' ' + (diff_d2.getMonth()+1) + '월' + ' ' + diff_d2.getDate() + '일'}`, res.start_time, res.end_time, res.content, true, res.id]]
+                    d_startdate[date_list[0]] = [[diff_v+1, res.title, diff_d1.getDay(), true, `${diff_d0.getFullYear() + '년' + ' ' + (diff_d0.getMonth()+1) + '월' + ' ' + diff_d0.getDate() + '일'}`, `${diff_d2.getFullYear() + '년' + ' ' + (diff_d2.getMonth()+1) + '월' + ' ' + diff_d2.getDate() + '일'}`, res.start_time, res.end_time, res.content, true, res.id, res.color]]
                 }
             } else if (diff_d0 < diff_d1 && diff_d3 < diff_d2 ) {
                 if (date_list[0] in d_startdate) {
-                    d_startdate[date_list[0]].push([36, res.title, diff_d1.getDay(), true, `${diff_d0.getFullYear() + '년' + ' ' + (diff_d0.getMonth()+1) + '월' + ' ' + diff_d0.getDate() + '일'}`, `${diff_d2.getFullYear() + '년' + ' ' + (diff_d2.getMonth()+1) + '월' + ' ' + diff_d2.getDate() + '일'}`, res.start_time, res.end_time, res.content, true, res.id])
+                    d_startdate[date_list[0]].push([36, res.title, diff_d1.getDay(), true, `${diff_d0.getFullYear() + '년' + ' ' + (diff_d0.getMonth()+1) + '월' + ' ' + diff_d0.getDate() + '일'}`, `${diff_d2.getFullYear() + '년' + ' ' + (diff_d2.getMonth()+1) + '월' + ' ' + diff_d2.getDate() + '일'}`, res.start_time, res.end_time, res.content, true, res.id, res.color])
                 } else {
-                    d_startdate[date_list[0]] = [[36, res.title, diff_d1.getDay(), true, `${diff_d0.getFullYear() + '년' + ' ' + (diff_d0.getMonth()+1) + '월' + ' ' + diff_d0.getDate() + '일'}`, `${diff_d2.getFullYear() + '년' + ' ' + (diff_d2.getMonth()+1) + '월' + ' ' + diff_d2.getDate() + '일'}`, res.start_time, res.end_time, res.content, true, res.id]]
+                    d_startdate[date_list[0]] = [[36, res.title, diff_d1.getDay(), true, `${diff_d0.getFullYear() + '년' + ' ' + (diff_d0.getMonth()+1) + '월' + ' ' + diff_d0.getDate() + '일'}`, `${diff_d2.getFullYear() + '년' + ' ' + (diff_d2.getMonth()+1) + '월' + ' ' + diff_d2.getDate() + '일'}`, res.start_time, res.end_time, res.content, true, res.id, res.color]]
                 }
             }
 
@@ -221,15 +252,15 @@ $(document).ready(async function() {
                     if (Number(res[0]) > Number(day_cal[res[2]])) {
                         if (res[9]) {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event event-consecutive" data-span="${day_cal[res[2]]}" data-toggle="popover" data-html="true" data-content=${data_content_consecutive}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-toggle="popover" data-html="true" data-content=${data_content_consecutive}>${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-consecutive" data-span="${day_cal[res[2]]}" data-toggle="popover" data-html="true" data-content=${data_content_consecutive}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-toggle="popover" data-html="true" data-content=${data_content_consecutive}>${res[1]}</div>`);
                             }
                         } else {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event" data-span="${day_cal[res[2]]}" data-toggle="popover" data-html="true" data-content=${data_content}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-toggle="popover" data-html="true" data-content=${data_content}>${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start" data-span="${day_cal[res[2]]}" data-toggle="popover" data-html="true" data-content=${data_content}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-toggle="popover" data-html="true" data-content=${data_content}>${res[1]}</div>`);
                             }
                         }
 
@@ -251,23 +282,23 @@ $(document).ready(async function() {
                         }
 
                         if (s_new_date in d_startdate) {
-                            d_startdate[s_new_date].push([Number(res[0]) - Number(day_cal[res[2]]), res[1], 0, true, res[4], res[5], res[6], res[7], res[8], res[9]])
+                            d_startdate[s_new_date].push([Number(res[0]) - Number(day_cal[res[2]]), res[1], 0, true, res[4], res[5], res[6], res[7], res[8], res[9], res[11], res[11]])
                         } else {
-                            d_startdate[s_new_date] = [[Number(res[0]) - Number(day_cal[res[2]]), res[1], 0, true, res[4], res[5], res[6], res[7], res[8], res[9]]]
+                            d_startdate[s_new_date] = [[Number(res[0]) - Number(day_cal[res[2]]), res[1], 0, true, res[4], res[5], res[6], res[7], res[8], res[9], res[11], res[11]]]
                         }
 
                     } else {
                         if (res[9]) {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event event-end event-consecutive" data-span="${res[0]}" data-toggle="popover" data-html="true" data-content=${data_content_consecutive}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-toggle="popover" data-html="true" data-content=${data_content_consecutive}>${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end event-consecutive" data-span="${res[0]}" data-toggle="popover" data-html="true" data-content=${data_content_consecutive}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-toggle="popover" data-html="true" data-content=${data_content_consecutive}>${res[1]}</div>`);
                             }
                         } else {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event event-end" data-span="${res[0]}" data-toggle="popover" data-html="true" data-content=${data_content}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-toggle="popover" data-html="true" data-content=${data_content}>${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end" data-span="${res[0]}" data-toggle="popover" data-html="true" data-content=${data_content}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-toggle="popover" data-html="true" data-content=${data_content}>${res[1]}</div>`);
                             }
                         }
                     }
@@ -351,17 +382,84 @@ $(document).ready(async function() {
         $('#day').append(today_schedule);
     }
 
-    // 일정 만들기 함수
-    $('#create').click(async function() {
+    // -- NEW MODAL ENHANCEMENTS --
+
+    // Remove any previous binding for the create button
+    $(document).off('click', '#create');
+
+    var selectedColor = '#4285F4'; // default color
+
+    // Delegated event: Add new subtask row when '+' is clicked
+    $(document).on('click', '#addSubtask', function() {
+        var newRow = $('<div class="subtask-item d-flex align-items-center mb-2">' +
+                       '<input type="checkbox" class="subtask-check mr-2">' +
+                       '<input type="text" class="subtask-text form-control" placeholder="세부 할 일">' +
+                       '</div>');
+        $('#subtasksContainer').append(newRow);
+        updateSubtaskProgress();
+    });
+
+    // Function to update the subtask progress indicator
+    function updateSubtaskProgress() {
+        var total = $('#subtasksContainer .subtask-item').length;
+        var completed = 0;
+        $('#subtasksContainer .subtask-item').each(function() {
+           if ($(this).find('.subtask-check').prop('checked')) {
+               completed++;
+           }
+        });
+        $('#completedCount').text(completed);
+        $('#totalCount').text(total);
+    }
+
+    // Update progress when a subtask checkbox changes state
+    $(document).on('change', '.subtask-check', function() {
+        updateSubtaskProgress();
+    });
+
+    // Delegated event: Color selection - highlight and record the selected color
+    $(document).on('click', '#colorSelector .color-circle', function() {
+        console.log('Color clicked: ', $(this).data('color'));
+        selectedColor = $(this).data('color');
+        $('#colorSelector .color-circle').removeClass('selected');
+        $(this).addClass('selected');
+    });
+
+    // Delegated event: Save button ("일정 만들기")
+    $(document).on('click', '#create', async function() {
         const data = new FormData();
-        data.append('title', document.getElementById("recipient-name").value)
-        data.append('content', document.getElementById("message-text").value)
-        data.append('start_day', document.getElementById("start-day").value)
-        data.append('end_day', document.getElementById("end-day").value)
-        data.append('start_time', document.getElementById("start-time").value)
-        data.append('end_time', document.getElementById("end-time").value)
-        await axios.post('api/v1/calendar_create/', data)
-        window.location.href = '/calendar'
+        data.append('title', $('#recipient-name').val());
+        
+        // Gather dynamic subtasks
+        var subtasks = [];
+        $('#subtasksContainer .subtask-item').each(function() {
+            var completed = $(this).find('.subtask-check').prop('checked');
+            var text = $(this).find('.subtask-text').val();
+            subtasks.push({ completed: completed, text: text });
+        });
+        data.append('subtasks', JSON.stringify(subtasks));
+        
+        // Append tags and selected color
+        data.append('tags', $('#todoTags').val());
+        data.append('color', selectedColor);
+        
+        // Append date/time fields (make sure these IDs match your modal inputs)
+        data.append('start_day', $('#start-day').val());
+        data.append('end_day', $('#end-day').val());
+        data.append('start_time', $('#start-time').val());
+        data.append('end_time', $('#end-time').val());
+        
+        await axios.post('api/v1/calendar_create/', data);
+        window.location.href = '/calendar';
+    });
+
+    // Delegated event: Delete button
+    $(document).on('click', '#deleteSchedule', function() {
+        if (confirm('정말 이 일정을 삭제하시겠습니까?')) {
+            // Implement deletion logic here if needed
+            console.log('Deleting schedule...');
+            $('#registerSchedule').modal('hide');
+        }
     });
 
     // today클릭시 현재날짜로 이동

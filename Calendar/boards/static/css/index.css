@@ -24,7 +24,7 @@ a:hover {
   border-right: 1px solid #D7E2EB;
   border-left: 1px solid #D7E2EB;
   border-radius: 12px;
-  background: #fff; opacity: 0.9; }
+  background: #fff; opacity: 0.95; }
 
 .calendar-header {
   display: flex;
@@ -240,3 +240,19 @@ a:hover {
       font-size: 13px; } }
 .modal .form-row .form-check-inline {
   align-items: baseline; }
+
+/* New styles for color selector circles with min dimensions */
+.color-circle {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    min-height: 30px;
+    border-radius: 50%;
+    margin: 5px;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+.color-circle.selected {
+    border: 2px solid #000;
+}

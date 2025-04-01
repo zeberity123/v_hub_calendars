@@ -3,7 +3,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import CalendarSerializer
-from .models import Calendar
+from .models import Calendar, Subtask
+import json
 
 # Create your views here.
 
@@ -19,16 +20,41 @@ def calendar_list(request):
 @api_view(['POST'])
 def calendar_create(request):
     title = request.data['title']
-    content = request.data['content']
+    # The new UI does not send content; default to empty string.
+    content = request.data.get('content', '')
+    tags = request.data.get('tags', '')
+    color = request.data.get('color', '#4285F4')
 
     start_day = __convert_day_format(request.data['start_day'])
     end_day = __convert_day_format(request.data['end_day'])
     start_time = __convert_time_display(request.data['start_time'])
     end_time = __convert_time_display(request.data['end_time'])
     
-    calendars = Calendar(title=title, content=content, start_day=start_day, end_day=end_day, start_time=start_time, end_time=end_time)
+    calendar_obj = Calendar(
+        title=title, 
+        content=content, 
+        tags=tags, 
+        color=color, 
+        start_day=start_day, 
+        end_day=end_day, 
+        start_time=start_time, 
+        end_time=end_time
+    )
+    calendar_obj.save()
 
-    calendars.save()
+    # Process subtasks data if provided (as a JSON string)
+    subtasks_data = request.data.get('subtasks', '[]')
+    try:
+        subtasks_list = json.loads(subtasks_data)
+        for sub in subtasks_list:
+            Subtask.objects.create(
+                calendar=calendar_obj, 
+                text=sub.get('text', ''), 
+                completed=sub.get('completed', False)
+            )
+    except json.JSONDecodeError:
+        # Could log the error if needed
+        pass
 
     return Response(status=status.HTTP_200_OK)
 
