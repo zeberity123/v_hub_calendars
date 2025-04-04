@@ -1,6 +1,7 @@
 $(document).ready(async function() {
     axios.defaults.xsrfCookieName = 'csrftoken'
     axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+    var toggle_d_day_status = true;
     // 현재날짜 저장
     var currentDate = new Date();
 
@@ -127,14 +128,33 @@ $(document).ready(async function() {
             const diff = Math.floor((diff_d2.getTime() - diff_d0.getTime()) / 1000 / 60 / 60 / 24)
             const diff_v = Math.floor((diff_d2.getTime() - diff_d1.getTime()) / 1000 / 60 / 60 / 24)
 
-            // Compute subtasks summary
+            // Compute summary
             var totalSubtasks = res.subtasks ? res.subtasks.length : 0;
             var completedSubtasks = 0;
             if (res.subtasks) {
                 completedSubtasks = res.subtasks.filter(function(st) { return st.completed; }).length;
             }
-            var summary = " (" + completedSubtasks + "/" + totalSubtasks + ")";
-            var titleWithSummary = res.title + summary;
+            var summary = " (" + completedSubtasks + "/" + totalSubtasks + ") ";
+            var d_day_str = 'D-' + (diff > 0 ? diff : 'Day');
+            var end_date_month = ''
+            var end_date_day = ''
+            if (isNotEmpty(e_day_0[0])){
+                var end_date_month = e_day_0[0].replace(/^0+/, '');
+            } else {
+                end_date_month = '*'
+            }
+            
+            if (isNotEmpty(e_day_0[0])){
+                var end_date_day = e_day_0[1].replace(/^0+/, '');
+            } else {
+                end_date_day = '*'
+            }
+
+            console.log('type: ', e_day_0[1], typeof end_date_day);
+            var end_date_str = end_date_month + "월 " + end_date_day + "일";
+            var toggle_str = toggle_d_day_status ? d_day_str : end_date_str;
+            var titleWithSummary = res.title + summary +  toggle_str;
+
 
             // DB에 있는 모든 일정 저장 (include color at the end)
             if (res.start_day in d_startdate) {
@@ -506,10 +526,38 @@ $(document).ready(async function() {
 
     });
     generateCalendar(currentDate);
+
+    // Toggle between d-day view and end date view when clicking the newly added button.
+    $(document).on('click', '#toggleSummary', function() {
+        toggle_d_day_status = !toggle_d_day_status;
+        // Optionally update button text to reflect current mode
+        $(this).text(toggle_d_day_status ? 'D-DAY' : '마감일');
+        // Clear and re-generate the calendar (assuming currentDate is in scope)
+        $('#div-list').html('');
+        $('#day').html('');
+        generateCalendar(currentDate);
+    });
 });
 
 String.prototype.replaceAll = function(org, dest) {
     return this.split(org).join(dest);
+}
+
+
+function isNotEmpty(str){
+    
+    if(typeof str == "undefined" || str == null || str == "")
+        return false;
+    else
+        return true ;
+}
+
+function nvl(str, defaultStr){
+    
+    if(typeof str == "undefined" || str == null || str == "")
+        str = defaultStr ;
+    
+    return str ;
 }
 
 $(function () {
