@@ -357,6 +357,8 @@ $(document).ready(async function() {
     }
     //day_view
     async function generateDaily(d) {
+        var current_day = new Date(d);
+        current_day.setDate(current_day.getDate());
         var startRange = new Date(d);
         var endRange = new Date(d);
         endRange.setDate(endRange.getDate() + 30);
@@ -424,12 +426,15 @@ $(document).ready(async function() {
             }
         });
 
-        var content = "";
+        var weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+        // Updated header:
+        var header = `<span class="day-name">${d.getDate()}일 ${weekDays[d.getDay()]}요일</span>`;
+        var content = header;
         eventsList.forEach(function(event) {
             content += event.html;
         });
 
-        // Render all todos in a single container without date/day headers
+        // Render all todos in a single container, with header for the selected day
         $('#day').html(`<div class="daily-calendar">${content}</div>`);
     }
 
