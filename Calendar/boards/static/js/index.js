@@ -2,6 +2,7 @@ $(document).ready(async function() {
     axios.defaults.xsrfCookieName = 'csrftoken'
     axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
     var toggle_d_day_status = true;
+    var toggle_sort_mode = true;
     // 현재날짜 저장
     var currentDate = new Date();
 
@@ -138,55 +139,51 @@ $(document).ready(async function() {
             var d_day_str = 'D-' + (diff > 0 ? diff : 'Day');
             var end_date_month = ''
             var end_date_day = ''
-            if (isNotEmpty(e_day_0[0])){
+            if (!isEmpty(e_day_0[0])){
                 var end_date_month = e_day_0[0].replace(/^0+/, '');
             } else {
                 end_date_month = '*'
             }
             
-            if (isNotEmpty(e_day_0[0])){
+            if (!isEmpty(e_day_0[0])){
                 var end_date_day = e_day_0[1].replace(/^0+/, '');
             } else {
                 end_date_day = '*'
             }
-
-            console.log('type: ', e_day_0[1], typeof end_date_day);
             var end_date_str = end_date_month + "월 " + end_date_day + "일";
             var toggle_str = toggle_d_day_status ? d_day_str : end_date_str;
             var titleWithSummary = res.title + summary +  toggle_str;
 
+            // Compute start and end timestamps:
+            var startTS = diff_d0.getTime();
+            var endTS = diff_d2.getTime();
+            // Compute subtask ratio (if there are no subtasks, treat as 1)
+            var subtaskRatio = (totalSubtasks > 0) ? (completedSubtasks / totalSubtasks) : 1;
 
-            // DB에 있는 모든 일정 저장 (include color at the end)
+            // Push array including extra sorting keys:
+            var event_arr = [
+                 diff+1,                 // index 0: event length (not used in sort)
+                 titleWithSummary,       // index 1: title with appended summary and d-day/end date string
+                 diff_d0.getDay(),       // index 2: starting weekday (not used in sort)
+                 false,                  // index 3: some flag (not used in sort)
+                 `${diff_d0.getFullYear()}년 ${diff_d0.getMonth()+1}월 ${diff_d0.getDate()}일`, // index 4: formatted start (for display)
+                 `${diff_d2.getFullYear()}년 ${diff_d2.getMonth()+1}월 ${diff_d2.getDate()}일`, // index 5: formatted end (for display)
+                 res.start_time,         // index 6: start time
+                 res.end_time,           // index 7: end time
+                 res.content,            // index 8: content
+                 judge,                  // index 9: judge flag
+                 res.id,                 // index 10: id
+                 res.color,              // index 11: color
+                 startTS,                // index 12: startTS for sorting
+                 endTS,                  // index 13: endTS for sorting
+                 subtaskRatio,           // index 14: subtask ratio for sorting
+                 res.title               // index 15: original title for alphabetical sort
+            ];
+            
             if (res.start_day in d_startdate) {
-                d_startdate[res.start_day].push([
-                    diff+1, 
-                    titleWithSummary, 
-                    diff_d0.getDay(), 
-                    false, 
-                    `${diff_d0.getFullYear()}년 ${diff_d0.getMonth()+1}월 ${diff_d0.getDate()}일`, 
-                    `${diff_d2.getFullYear()}년 ${diff_d2.getMonth()+1}월 ${diff_d2.getDate()}일`, 
-                    res.start_time, 
-                    res.end_time, 
-                    res.content, 
-                    judge, 
-                    res.id,
-                    res.color
-                ]);
+                 d_startdate[res.start_day].push(event_arr);
             } else {
-                d_startdate[res.start_day] = [[
-                    diff+1, 
-                    titleWithSummary, 
-                    diff_d0.getDay(), 
-                    false, 
-                    `${diff_d0.getFullYear()}년 ${diff_d0.getMonth()+1}월 ${diff_d0.getDate()}일`, 
-                    `${diff_d2.getFullYear()}년 ${diff_d2.getMonth()+1}월 ${diff_d2.getDate()}일`, 
-                    res.start_time, 
-                    res.end_time, 
-                    res.content, 
-                    judge, 
-                    res.id,
-                    res.color
-                ]];
+                 d_startdate[res.start_day] = [ event_arr ];
             }
 
             // date_list에 시작날짜가 없어서 따로 저장하여 달력에 띄우기 위한 작업
@@ -214,10 +211,25 @@ $(document).ready(async function() {
         }).mouseout(function() {
             $(this).removeClass('hover');
         });
-        //일 일정 생성
+        //month_view
         generateDaily(d)
         // date_content 값 생성 및 일정 html 달력에 추가작업
         var day_cal = ['7', '6', '5', '4', '3', '2', '1']
+        for (var key in d_startdate) {
+            d_startdate[key].sort(function(a, b) {
+                if (toggle_sort_mode) {  // sort by start_date
+                    if (a[12] !== b[12]) return b[12] - a[12];
+                    else if (a[13] !== b[13]) return b[13] - a[13];
+                    else if (a[14] !== b[14]) return b[14] - a[14];
+                    else return a[15].localeCompare(b[15]);
+                } else {  // sort by end_date
+                    if (a[13] !== b[13]) return b[13] - a[13];
+                    else if (a[12] !== b[12]) return b[12] - a[12];
+                    else if (a[14] !== b[14]) return [14] - a[14];
+                    else return a[15].localeCompare(b[15]);
+                }
+            });
+        }
         for (var i in date_list) {
             if (date_list[i] in d_startdate) {
                 d_startdate[date_list[i]].forEach(res => {
@@ -343,61 +355,111 @@ $(document).ready(async function() {
             event.stopPropagation();
         });
     }
-    //월, 일 일정이 따로 있어 일 일정을 따로 함수 구현
+    //day_view
     async function generateDaily(d) {  
-        const weekDays = ['일', '월', '화', '수', '목', '금', '토']
-        var today_schedule = `<div class="daily-calendar"><span class="day-name">${d.getDate() + '일' + ' ' + weekDays[d.getDay()] + '요일'}</span>`
+        var dailyEvents = [];
         await all_DB.forEach(res => {
-            const start_date = res.start_day.split('-')
-            const end_date = res.end_day.split('-')
+            const start_date = res.start_day.split('-');
+            const end_date = res.end_day.split('-');
             
-            const start_date_0 = new Date(start_date[2], start_date[0]-1, start_date[1])
-            const end_date_0 = new Date(end_date[2], end_date[0]-1, end_date[1])
-            const end_date_1 = new Date(end_date[2], end_date[0]-1, Number(end_date[1])+1)
-
+            const start_date_0 = new Date(start_date[2], start_date[0]-1, start_date[1]);
+            const end_date_0 = new Date(end_date[2], end_date[0]-1, end_date[1]);
+            const end_date_1 = new Date(end_date[2], end_date[0]-1, Number(end_date[1])+1);
+            
             if (start_date_0 <= d && d < end_date_1) {
-                if (res.start_day === res.end_day) {
-                    today_schedule += `<div class="event event-start event-end" data-toggle="popover" data-html="true" data-placement="left" 
-                    data-content='<div class="content-line">
-                                    <div class="event-marking"></div>
-                                    <div class="title">
-                                        <h5>${res.title}</h5>
-                                        <h6 class="reservation">${start_date_0.getFullYear() + '년' + ' ' + (start_date_0.getMonth()+1) + '월' + ' ' + start_date_0.getDate() + '일' + ' ' + '~' + ' ' + end_date_0.getFullYear() + '년' + ' ' + (end_date_0.getMonth()+1) + '월' + ' ' + end_date_0.getDate() + '일'}</h6>
-                                    </div>
-                                </div>
-                                <div class="content-line">
-                                <i class="material-icons">
-                                    notes
-                                </i>
-                                <div class="title">
-                                    <h6 class="reservation">
-                                        ${res.content}
-                                    </h6>
-                                    </div>'>${res.title}
-                                </div>`
-                } else {
-                    today_schedule += `<div class="event-consecutive event-start event-end" data-toggle="popover" data-html="true" data-placement="left" 
-                    data-content='<div class="content-line">
-                                    <div class="event-consecutive-marking"></div>
-                                    <div class="title">
-                                        <h5>${res.title}</h5>
-                                        <h6 class="reservation">${start_date_0.getFullYear() + '년' + ' ' + (start_date_0.getMonth()+1) + '월' + ' ' + start_date_0.getDate() + '일' + ' ' + '~' + ' ' + end_date_0.getFullYear() + '년' + ' ' + (end_date_0.getMonth()+1) + '월' + ' ' + end_date_0.getDate() + '일'}</h6>
-                                    </div>
-                                </div>
-                                <div class="content-line">
-                                <i class="material-icons">
-                                    notes
-                                </i>
-                                <div class="title">
-                                    <h6 class="reservation">
-                                        ${res.content}
-                                    </h6>
-                                    </div>'>${res.title}
-                                </div>`
+                // Compute subtasks summary
+                var totalSubtasks = res.subtasks ? res.subtasks.length : 0;
+                var completedSubtasks = 0;
+                if (res.subtasks) {
+                    completedSubtasks = res.subtasks.filter(function(st) { return st.completed; }).length;
                 }
+                var subtaskSummary = " (" + completedSubtasks + "/" + totalSubtasks + ") ";
+                
+                // Compute remaining days until end date relative to current day 'd'
+                var remaining = Math.floor((end_date_0.getTime() - d.getTime()) / (1000*60*60*24));
+                var d_day_str = 'D-' + (remaining > 0 ? remaining : 'Day');
+                var end_date_str = (end_date_0.getMonth()+1) + "월 " + end_date_0.getDate() + "일";
+                var toggle_str = toggle_d_day_status ? d_day_str : end_date_str;
+                
+                // Compute sort keys:
+                var startTS = start_date_0.getTime();
+                var endTS = end_date_0.getTime();
+                var subtaskRatio = (totalSubtasks > 0) ? (completedSubtasks/totalSubtasks) : 1;
+                
+                var titleWithSummary = res.title + subtaskSummary + toggle_str;
+                
+                // Create an object with sort keys and HTML snippet (we build the HTML similarly as before)
+                var eventData = {
+                    sortStart: startTS,
+                    sortEnd: endTS,
+                    ratio: subtaskRatio,
+                    origTitle: res.title,
+                    html: ""  // will be filled below
+                };
+                
+                if (res.start_day === res.end_day) {
+                    eventData.html = `<div class="event event-start event-end" style="background-color: ${res.color}; color:#fff;" data-toggle="popover" data-html="true" data-placement="left" 
+                            data-content='<div class="content-line">
+                                            <div class="event-marking"></div>
+                                            <div class="title">
+                                                <h5>${titleWithSummary}</h5>
+                                                <h6 class="reservation">${start_date_0.getFullYear()}년 ${start_date_0.getMonth()+1}월 ${start_date_0.getDate()}일 ~ ${end_date_0.getFullYear()}년 ${end_date_0.getMonth()+1}월 ${end_date_0.getDate()}일</h6>
+                                            </div>
+                                        </div>
+                                        <div class="content-line">
+                                        <i class="material-icons">
+                                            notes
+                                        </i>
+                                        <div class="title">
+                                            <h6 class="reservation">
+                                                ${res.content}
+                                            </h6>
+                                        </div>'>${titleWithSummary}</div>`;
+                } else {
+                    eventData.html = `<div class="event-consecutive event-start event-end" style="background-color: ${res.color}; color:#fff;" data-toggle="popover" data-html="true" data-placement="left" 
+                            data-content='<div class="content-line">
+                                            <div class="event-consecutive-marking"></div>
+                                            <div class="title">
+                                                <h5>${titleWithSummary}</h5>
+                                                <h6 class="reservation">${start_date_0.getFullYear()}년 ${start_date_0.getMonth()+1}월 ${start_date_0.getDate()}일 ~ ${end_date_0.getFullYear()}년 ${end_date_0.getMonth()+1}월 ${end_date_0.getDate()}일</h6>
+                                            </div>
+                                        </div>
+                                        <div class="content-line">
+                                        <i class="material-icons">
+                                            notes
+                                        </i>
+                                        <div class="title">
+                                            <h6 class="reservation">
+                                                ${res.content}
+                                            </h6>
+                                        </div>'>${titleWithSummary}</div>`;
+                }
+                
+                dailyEvents.push(eventData);
             }
-      
-        })
+        });
+        
+        // Sort dailyEvents using the same criteria as in generateCalendar
+        dailyEvents.sort(function(a, b) {
+            if (toggle_sort_mode) { // sort by end_date
+                 if (a.sortEnd !== b.sortEnd) return a.sortEnd - b.sortEnd;
+                 else if (a.sortStart !== b.sortStart) return a.sortStart - b.sortStart;
+                 else if (a.ratio !== b.ratio) return a.ratio - b.ratio;
+                 else return a.origTitle.localeCompare(b.origTitle);
+            } else { // sort by start_date
+                 if (a.sortStart !== b.sortStart) return a.sortStart - b.sortStart;
+                 else if (a.sortEnd !== b.sortEnd) return a.sortEnd - b.sortEnd;
+                 else if (a.ratio !== b.ratio) return a.ratio - b.ratio;
+                 else return a.origTitle.localeCompare(b.origTitle);
+            }
+        });
+        
+        // Append sorted events to today_schedule:
+        var weekDays = ['일', '월', '화', '수', '목', '금', '토']
+        var today_schedule = `<div class="daily-calendar"><span class="day-name">${d.getDate() + '일' + ' ' + weekDays[d.getDay()] + '요일'}</span>`
+        dailyEvents.forEach(function(event) {
+            today_schedule += event.html;
+        });
         today_schedule += '</div>'
         $('#day').append(today_schedule);
     }
@@ -537,6 +599,16 @@ $(document).ready(async function() {
         $('#day').html('');
         generateCalendar(currentDate);
     });
+
+    // Toggle sorting between end_date and start_date
+    $(document).on('click', '#toggleSort', function() {
+        toggle_sort_mode = !toggle_sort_mode;
+        $(this).text(toggle_sort_mode ? '마감일순' : '시작일순');
+        // Re-generate the calendar (both month and day views) with the new sort order
+        $('#div-list').html('');
+        $('#day').html('');
+        generateCalendar(currentDate);
+    });
 });
 
 String.prototype.replaceAll = function(org, dest) {
@@ -544,12 +616,12 @@ String.prototype.replaceAll = function(org, dest) {
 }
 
 
-function isNotEmpty(str){
+function isEmpty(str){
     
     if(typeof str == "undefined" || str == null || str == "")
-        return false;
+        return true;
     else
-        return true ;
+        return false ;
 }
 
 function nvl(str, defaultStr){
