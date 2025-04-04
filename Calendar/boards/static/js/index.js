@@ -356,112 +356,81 @@ $(document).ready(async function() {
         });
     }
     //day_view
-    async function generateDaily(d) {  
-        var dailyEvents = [];
-        await all_DB.forEach(res => {
-            const start_date = res.start_day.split('-');
-            const end_date = res.end_day.split('-');
-            
-            const start_date_0 = new Date(start_date[2], start_date[0]-1, start_date[1]);
-            const end_date_0 = new Date(end_date[2], end_date[0]-1, end_date[1]);
-            const end_date_1 = new Date(end_date[2], end_date[0]-1, Number(end_date[1])+1);
-            
-            if (start_date_0 <= d && d < end_date_1) {
-                // Compute subtasks summary
-                var totalSubtasks = res.subtasks ? res.subtasks.length : 0;
-                var completedSubtasks = 0;
-                if (res.subtasks) {
-                    completedSubtasks = res.subtasks.filter(function(st) { return st.completed; }).length;
+    async function generateDaily(d) {
+        var startRange = new Date(d);
+        var endRange = new Date(d);
+        endRange.setDate(endRange.getDate() + 30);
+        var uniqueEvents = {};
+
+        all_DB.forEach(res => {
+            const sParts = res.start_day.split('-');
+            const eParts = res.end_day.split('-');
+            let eventStart = new Date(sParts[2], sParts[0] - 1, sParts[1]);
+            let eventEnd = new Date(eParts[2], eParts[0] - 1, eParts[1]);
+            // Add one day to event end for overlap checking
+            let eventEndPlus = new Date(eParts[2], eParts[0] - 1, Number(eParts[1]) + 1);
+
+            // Check if the event overlaps with the 30-day range
+            if (eventStart < endRange && eventEndPlus > startRange) {
+                // Use event id to prevent duplicates
+                if (!(res.id in uniqueEvents)) {
+                    var totalSubtasks = res.subtasks ? res.subtasks.length : 0;
+                    var completedSubtasks = 0;
+                    if (res.subtasks) {
+                        completedSubtasks = res.subtasks.filter(function(st) { return st.completed; }).length;
+                    }
+                    var subtaskSummary = " (" + completedSubtasks + "/" + totalSubtasks + ") ";
+                    // Compute remaining days relative to the selected day
+                    var remaining = Math.floor((eventEnd.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+                    var d_day_str = 'D-' + (remaining > 0 ? remaining : 'Day');
+                    var end_date_str = (eventEnd.getMonth() + 1) + "월 " + eventEnd.getDate() + "일";
+                    var toggle_str = toggle_d_day_status ? d_day_str : end_date_str;
+                    var titleWithSummary = res.title + subtaskSummary + toggle_str;
+
+                    var startTS = eventStart.getTime();
+                    var endTS = eventEnd.getTime();
+                    var subtaskRatio = (totalSubtasks > 0) ? (completedSubtasks / totalSubtasks) : 1;
+                    var html = "";
+
+                    if (res.start_day === res.end_day) {
+                        html = `<div class="event event-start event-end" style="background-color: ${res.color}; color:#fff;" data-toggle="popover" data-html="true" data-placement="left" data-content='<div class="content-line"><div class="event-marking"></div><div class="title"><h5>${titleWithSummary}</h5><h6 class="reservation">${eventStart.getFullYear()}년 ${eventStart.getMonth()+1}월 ${eventStart.getDate()}일 ~ ${eventEnd.getFullYear()}년 ${eventEnd.getMonth()+1}월 ${eventEnd.getDate()}일</h6></div></div><div class="content-line"><i class="material-icons">notes</i><div class="title"><h6 class="reservation">${res.content}</h6></div>'>${titleWithSummary}</div>`;
+                    } else {
+                        html = `<div class="event-consecutive event-start event-end" style="background-color: ${res.color}; color:#fff;" data-toggle="popover" data-html="true" data-placement="left" data-content='<div class="content-line"><div class="event-consecutive-marking"></div><div class="title"><h5>${titleWithSummary}</h5><h6 class="reservation">${eventStart.getFullYear()}년 ${eventStart.getMonth()+1}월 ${eventStart.getDate()}일 ~ ${eventEnd.getFullYear()}년 ${eventEnd.getMonth()+1}월 ${eventEnd.getDate()}일</h6></div></div><div class="content-line"><i class="material-icons">notes</i><div class="title"><h6 class="reservation">${res.content}</h6></div>'>${titleWithSummary}</div>`;
+                    }
+
+                    uniqueEvents[res.id] = {
+                        sortStart: startTS,
+                        sortEnd: endTS,
+                        ratio: subtaskRatio,
+                        origTitle: res.title,
+                        html: html
+                    };
                 }
-                var subtaskSummary = " (" + completedSubtasks + "/" + totalSubtasks + ") ";
-                
-                // Compute remaining days until end date relative to current day 'd'
-                var remaining = Math.floor((end_date_0.getTime() - d.getTime()) / (1000*60*60*24));
-                var d_day_str = 'D-' + (remaining > 0 ? remaining : 'Day');
-                var end_date_str = (end_date_0.getMonth()+1) + "월 " + end_date_0.getDate() + "일";
-                var toggle_str = toggle_d_day_status ? d_day_str : end_date_str;
-                
-                // Compute sort keys:
-                var startTS = start_date_0.getTime();
-                var endTS = end_date_0.getTime();
-                var subtaskRatio = (totalSubtasks > 0) ? (completedSubtasks/totalSubtasks) : 1;
-                
-                var titleWithSummary = res.title + subtaskSummary + toggle_str;
-                
-                // Create an object with sort keys and HTML snippet (we build the HTML similarly as before)
-                var eventData = {
-                    sortStart: startTS,
-                    sortEnd: endTS,
-                    ratio: subtaskRatio,
-                    origTitle: res.title,
-                    html: ""  // will be filled below
-                };
-                
-                if (res.start_day === res.end_day) {
-                    eventData.html = `<div class="event event-start event-end" style="background-color: ${res.color}; color:#fff;" data-toggle="popover" data-html="true" data-placement="left" 
-                            data-content='<div class="content-line">
-                                            <div class="event-marking"></div>
-                                            <div class="title">
-                                                <h5>${titleWithSummary}</h5>
-                                                <h6 class="reservation">${start_date_0.getFullYear()}년 ${start_date_0.getMonth()+1}월 ${start_date_0.getDate()}일 ~ ${end_date_0.getFullYear()}년 ${end_date_0.getMonth()+1}월 ${end_date_0.getDate()}일</h6>
-                                            </div>
-                                        </div>
-                                        <div class="content-line">
-                                        <i class="material-icons">
-                                            notes
-                                        </i>
-                                        <div class="title">
-                                            <h6 class="reservation">
-                                                ${res.content}
-                                            </h6>
-                                        </div>'>${titleWithSummary}</div>`;
-                } else {
-                    eventData.html = `<div class="event-consecutive event-start event-end" style="background-color: ${res.color}; color:#fff;" data-toggle="popover" data-html="true" data-placement="left" 
-                            data-content='<div class="content-line">
-                                            <div class="event-consecutive-marking"></div>
-                                            <div class="title">
-                                                <h5>${titleWithSummary}</h5>
-                                                <h6 class="reservation">${start_date_0.getFullYear()}년 ${start_date_0.getMonth()+1}월 ${start_date_0.getDate()}일 ~ ${end_date_0.getFullYear()}년 ${end_date_0.getMonth()+1}월 ${end_date_0.getDate()}일</h6>
-                                            </div>
-                                        </div>
-                                        <div class="content-line">
-                                        <i class="material-icons">
-                                            notes
-                                        </i>
-                                        <div class="title">
-                                            <h6 class="reservation">
-                                                ${res.content}
-                                            </h6>
-                                        </div>'>${titleWithSummary}</div>`;
-                }
-                
-                dailyEvents.push(eventData);
             }
         });
-        
-        // Sort dailyEvents using the same criteria as in generateCalendar
-        dailyEvents.sort(function(a, b) {
-            if (toggle_sort_mode) { // sort by end_date
-                 if (a.sortEnd !== b.sortEnd) return a.sortEnd - b.sortEnd;
-                 else if (a.sortStart !== b.sortStart) return a.sortStart - b.sortStart;
-                 else if (a.ratio !== b.ratio) return a.ratio - b.ratio;
-                 else return a.origTitle.localeCompare(b.origTitle);
-            } else { // sort by start_date
-                 if (a.sortStart !== b.sortStart) return a.sortStart - b.sortStart;
-                 else if (a.sortEnd !== b.sortEnd) return a.sortEnd - b.sortEnd;
-                 else if (a.ratio !== b.ratio) return a.ratio - b.ratio;
-                 else return a.origTitle.localeCompare(b.origTitle);
+
+        var eventsList = Object.values(uniqueEvents);
+        eventsList.sort(function(a, b) {
+            if (toggle_sort_mode) {
+                if (a.sortEnd !== b.sortEnd) return a.sortEnd - b.sortEnd;
+                else if (a.sortStart !== b.sortStart) return a.sortStart - b.sortStart;
+                else if (a.ratio !== b.ratio) return a.ratio - b.ratio;
+                else return a.origTitle.localeCompare(b.origTitle);
+            } else {
+                if (a.sortStart !== b.sortStart) return a.sortStart - b.sortStart;
+                else if (a.sortEnd !== b.sortEnd) return a.sortEnd - b.sortEnd;
+                else if (a.ratio !== b.ratio) return a.ratio - b.ratio;
+                else return a.origTitle.localeCompare(b.origTitle);
             }
         });
-        
-        // Append sorted events to today_schedule:
-        var weekDays = ['일', '월', '화', '수', '목', '금', '토']
-        var today_schedule = `<div class="daily-calendar"><span class="day-name">${d.getDate() + '일' + ' ' + weekDays[d.getDay()] + '요일'}</span>`
-        dailyEvents.forEach(function(event) {
-            today_schedule += event.html;
+
+        var content = "";
+        eventsList.forEach(function(event) {
+            content += event.html;
         });
-        today_schedule += '</div>'
-        $('#day').append(today_schedule);
+
+        // Render all todos in a single container without date/day headers
+        $('#day').html(`<div class="daily-calendar">${content}</div>`);
     }
 
     // -- NEW MODAL ENHANCEMENTS --
