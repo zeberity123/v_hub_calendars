@@ -59,10 +59,46 @@ def calendar_create(request):
     return Response(status=status.HTTP_200_OK)
 
 @api_view(['DELETE'])
-def calendar_delete(request):
-    board_id = request.data['id']
-    board = Calendar.objects.get(pk=board_id)
-    board.delete()
+def calendar_delete(request, pk):
+    try:
+        event = Calendar.objects.get(pk=pk)
+    except Calendar.DoesNotExist:
+        return Response({'error': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)
+    event.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['PUT'])
+def calendar_update(request, pk):
+    try:
+        event = Calendar.objects.get(pk=pk)
+    except Calendar.DoesNotExist:
+        return Response({'error': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    event.title = request.data.get('title', event.title)
+    event.start_day = __convert_day_format(request.data.get('start_day', event.start_day))
+    event.end_day = __convert_day_format(request.data.get('end_day', event.end_day))
+    event.start_time = __convert_time_display(request.data.get('start_time', event.start_time))
+    event.end_time = __convert_time_display(request.data.get('end_time', event.end_time))
+    event.content = request.data.get('content', event.content)
+    event.color = request.data.get('color', event.color)
+    event.save()
+    
+    # Process subtasks data if provided (as a JSON string)
+    subtasks_data = request.data.get('subtasks', '[]')
+    try:
+        subtasks_list = json.loads(subtasks_data)
+        # Delete existing subtasks for this event
+        Subtask.objects.filter(calendar=event).delete()
+        for sub in subtasks_list:
+            Subtask.objects.create(
+                calendar=event,
+                text=sub.get('text', ''),
+                completed=sub.get('completed', False)
+            )
+    except json.JSONDecodeError:
+        # Could log the error if needed
+        pass
+
     return Response(status=status.HTTP_200_OK)
 
 def __convert_day_format(day):

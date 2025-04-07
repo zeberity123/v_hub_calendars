@@ -6,6 +6,9 @@ $(document).ready(async function() {
     // 현재날짜 저장
     var currentDate = new Date();
 
+    // Add a global variable to track the current view mode
+    var currentView = 'month'; // default to month view
+
     // DB에 있는 모든 데이터 저장
     var all_DB
     await axios.get('api/v1/calendar_list/')
@@ -180,6 +183,9 @@ $(document).ready(async function() {
                  res.title               // index 15: original title for alphabetical sort
             ];
             
+            event_arr.push(res.subtasks || []);
+            event_arr.raw = res;
+            
             if (res.start_day in d_startdate) {
                  d_startdate[res.start_day].push(event_arr);
             } else {
@@ -256,7 +262,7 @@ $(document).ready(async function() {
                                                             </h6>
                                                         </div>
                                                         <hr>
-                                                        <button type="button" class="btn btn-danger delete">삭제</button>
+                                                        <button type="button" class="btn btn-danger delete">수정</button>
                                                     </div>'`
                     var data_content = `'<div class="content-line">
                                             <div class="event-marking">
@@ -284,15 +290,55 @@ $(document).ready(async function() {
                     if (Number(res[0]) > Number(day_cal[res[2]])) {
                         if (res[9]) {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-toggle="popover" data-html="true" data-content=${data_content_consecutive}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event='${JSON.stringify(res.raw || {
+                                    id: res[10],
+                                    title: res[15],
+                                    start_day: res[4],
+                                    end_day: res[5],
+                                    start_time: res[6],
+                                    end_time: res[7],
+                                    content: res[8],
+                                    color: res[11],
+                                    subtasks: res[16]
+                                })}'>${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-toggle="popover" data-html="true" data-content=${data_content_consecutive}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || {
+                                    id: res[10],
+                                    title: res[15],
+                                    start_day: res[4],
+                                    end_day: res[5],
+                                    start_time: res[6],
+                                    end_time: res[7],
+                                    content: res[8],
+                                    color: res[11],
+                                    subtasks: res[16]
+                                })}'>${res[1]}</div>`);
                             }
                         } else {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-toggle="popover" data-html="true" data-content=${data_content}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event='${JSON.stringify(res.raw || {
+                                    id: res[10],
+                                    title: res[15],
+                                    start_day: res[4],
+                                    end_day: res[5],
+                                    start_time: res[6],
+                                    end_time: res[7],
+                                    content: res[8],
+                                    color: res[11],
+                                    subtasks: res[16]
+                                })}'>${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-toggle="popover" data-html="true" data-content=${data_content}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event='${JSON.stringify(res.raw || {
+                                    id: res[10],
+                                    title: res[15],
+                                    start_day: res[4],
+                                    end_day: res[5],
+                                    start_time: res[6],
+                                    end_time: res[7],
+                                    content: res[8],
+                                    color: res[11],
+                                    subtasks: res[16]
+                                })}'>${res[1]}</div>`);
                             }
                         }
 
@@ -322,15 +368,55 @@ $(document).ready(async function() {
                     } else {
                         if (res[9]) {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-toggle="popover" data-html="true" data-content=${data_content_consecutive}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || {
+                                    id: res[10],
+                                    title: res[15],
+                                    start_day: res[4],
+                                    end_day: res[5],
+                                    start_time: res[6],
+                                    end_time: res[7],
+                                    content: res[8],
+                                    color: res[11],
+                                    subtasks: res[16]
+                                })}'>${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-toggle="popover" data-html="true" data-content=${data_content_consecutive}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || {
+                                    id: res[10],
+                                    title: res[15],
+                                    start_day: res[4],
+                                    end_day: res[5],
+                                    start_time: res[6],
+                                    end_time: res[7],
+                                    content: res[8],
+                                    color: res[11],
+                                    subtasks: res[16]
+                                })}'>${res[1]}</div>`);
                             }
                         } else {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-toggle="popover" data-html="true" data-content=${data_content}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || {
+                                    id: res[10],
+                                    title: res[15],
+                                    start_day: res[4],
+                                    end_day: res[5],
+                                    start_time: res[6],
+                                    end_time: res[7],
+                                    content: res[8],
+                                    color: res[11],
+                                    subtasks: res[16]
+                                })}'>${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-toggle="popover" data-html="true" data-content=${data_content}>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || {
+                                    id: res[10],
+                                    title: res[15],
+                                    start_day: res[4],
+                                    end_day: res[5],
+                                    start_time: res[6],
+                                    end_time: res[7],
+                                    content: res[8],
+                                    color: res[11],
+                                    subtasks: res[16]
+                                })}'>${res[1]}</div>`);
                             }
                         }
                     }
@@ -339,20 +425,52 @@ $(document).ready(async function() {
         }
 
         // 일정 클릭시 팝업으로 일정 상세내용이 나옴
-        $(function () {
-            $('[data-toggle="popover"]').popover().on('inserted.bs.popover')
+        $(document).on('click', '.event, .event-consecutive, .event-repeated', function(e) {
+            e.preventDefault();
+            const eventData = $(this).data('event');
+            // Clear existing subtasks
+            $('#subtasksContainer').empty();
+            if (eventData) {
+                // Pre-fill the modal form with event data
+                $('#recipient-name').val(eventData.title);
+                $('#start-day').val(eventData.start_day);
+                $('#end-day').val(eventData.end_day);
+                $('#start-time').val(eventData.start_time);
+                $('#end-time').val(eventData.end_time);
+                $('#message-text').val(eventData.content);
+                
+                // Set the color
+                selectedColor = eventData.color;
+                $('#colorSelector .color-circle').removeClass('selected');
+                $(`#colorSelector .color-circle[data-color="${eventData.color}"]`).addClass('selected');
+                
+                // Load and render subtasks if available
+                if (eventData.subtasks && eventData.subtasks.length > 0) {
+                    eventData.subtasks.forEach(function(subtask) {
+                        var newRow = $("<div class='subtask-item d-flex align-items-center mb-2'>" +
+                                       "<input type='checkbox' class='subtask-check mr-2'>" +
+                                       "<input type='text' class='subtask-text form-control' placeholder='세부 할 일'>" +
+                                       "</div>");
+                        newRow.find('.subtask-check').prop('checked', subtask.completed);
+                        newRow.find('.subtask-text').val(subtask.text);
+                        $('#subtasksContainer').append(newRow);
+                    });
+                }
+                updateSubtaskProgress();
+                
+                // Store the event ID for update/delete operations
+                $('#registerSchedule').data('eventId', eventData.id);
+            }
+            $('#registerSchedule').modal('show');
         });
 
         // 달력클릭시 일정작성 폼이 나옴
         $('.week, .daily-calendar').click(function(e) {
             var cutdate = e.target.id.replaceAll('-', '/')
             $('[name=start_day]').val(cutdate)
+            // Clear any existing event data
+            $('#registerSchedule').removeData('eventId');
             $('#registerSchedule').modal('show');
-        });
-
-        // 팝업 2개 이상 나오는 것을 막음
-        $(".event-consecutive, .event, .event-repeated").click(function(event) {
-            event.stopPropagation();
         });
     }
     //day_view
@@ -364,17 +482,52 @@ $(document).ready(async function() {
         endRange.setDate(endRange.getDate() + 30);
         var uniqueEvents = {};
 
+        // First pass: collect all events to calculate maximum widths
+        var maxTitleLength = 0;
+        var maxSummaryLength = 0;
+        var maxDdayLength = 0;
+        var maxEndDateLength = 0;
+        var maxStartDateLength = 0;
+
         all_DB.forEach(res => {
             const sParts = res.start_day.split('-');
             const eParts = res.end_day.split('-');
             let eventStart = new Date(sParts[2], sParts[0] - 1, sParts[1]);
             let eventEnd = new Date(eParts[2], eParts[0] - 1, eParts[1]);
-            // Add one day to event end for overlap checking
             let eventEndPlus = new Date(eParts[2], eParts[0] - 1, Number(eParts[1]) + 1);
 
-            // Check if the event overlaps with the 30-day range
             if (eventStart < endRange && eventEndPlus > startRange) {
-                // Use event id to prevent duplicates
+                if (!(res.id in uniqueEvents)) {
+                    var totalSubtasks = res.subtasks ? res.subtasks.length : 0;
+                    var completedSubtasks = 0;
+                    if (res.subtasks) {
+                        completedSubtasks = res.subtasks.filter(function(st) { return st.completed; }).length;
+                    }
+                    var subtaskSummary = "(" + completedSubtasks + "/" + totalSubtasks + ")";
+                    var remaining = Math.floor((eventEnd.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+                    var d_day_str = 'D-' + (remaining > 0 ? remaining : '0');
+                    var end_date_str = '마감일: ' + (eventEnd.getMonth() + 1) + "월 " + eventEnd.getDate() + "일";
+                    var start_date_str = '시작일: ' + (eventStart.getMonth() + 1) + "월 " + eventStart.getDate() + "일";
+
+                    // Update maximum lengths with proper character count
+                    maxTitleLength = Math.max(maxTitleLength, res.title.length * 2.5); // Korean characters are wider
+                    maxSummaryLength = Math.max(maxSummaryLength, subtaskSummary.length);
+                    maxDdayLength = Math.max(maxDdayLength, d_day_str.length * 1.3);
+                    maxEndDateLength = Math.max(maxEndDateLength, end_date_str.length * 1.5);
+                    maxStartDateLength = Math.max(maxStartDateLength, start_date_str.length * 1.5);
+                }
+            }
+        });
+
+        // Second pass: create events with grid layout
+        all_DB.forEach(res => {
+            const sParts = res.start_day.split('-');
+            const eParts = res.end_day.split('-');
+            let eventStart = new Date(sParts[2], sParts[0] - 1, sParts[1]);
+            let eventEnd = new Date(eParts[2], eParts[0] - 1, eParts[1]);
+            let eventEndPlus = new Date(eParts[2], eParts[0] - 1, Number(eParts[1]) + 1);
+
+            if (eventStart < endRange && eventEndPlus > startRange) {
                 if (!(res.id in uniqueEvents)) {
                     var totalSubtasks = res.subtasks ? res.subtasks.length : 0;
                     var completedSubtasks = 0;
@@ -382,12 +535,21 @@ $(document).ready(async function() {
                         completedSubtasks = res.subtasks.filter(function(st) { return st.completed; }).length;
                     }
                     var subtaskSummary = " (" + completedSubtasks + "/" + totalSubtasks + ") ";
-                    // Compute remaining days relative to the selected day
                     var remaining = Math.floor((eventEnd.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-                    var d_day_str = 'D-' + (remaining > 0 ? remaining : 'Day');
-                    var end_date_str = (eventEnd.getMonth() + 1) + "월 " + eventEnd.getDate() + "일";
-                    var toggle_str = toggle_d_day_status ? d_day_str : end_date_str;
-                    var titleWithSummary = res.title + subtaskSummary + toggle_str;
+                    var d_day_str = 'D-' + (remaining > 0 ? remaining : '0');
+                    var end_date_str = '마감일: ' + (eventEnd.getMonth() + 1) + "월 " + eventEnd.getDate() + "일";
+                    var start_date_str = '시작일: ' + (eventStart.getMonth() + 1) + "월 " + eventStart.getDate() + "일";
+
+                    // Create grid layout with fixed-width columns
+                    var titleWithSummary = `
+                        <div class="event-grid">
+                            <div class="grid-title" style="width: ${maxTitleLength}ch">${res.title}</div>
+                            <div class="grid-summary" style="width: ${maxSummaryLength}ch">${subtaskSummary}</div>
+                            <div class="grid-dday" style="width: ${maxDdayLength}ch">${d_day_str}</div>
+                            <div class="grid-start-date" style="width: ${maxStartDateLength}ch">${start_date_str}</div>
+                            <div class="grid-end-date" style="width: ${maxEndDateLength}ch">${end_date_str}</div>
+                        </div>
+                    `;
 
                     var startTS = eventStart.getTime();
                     var endTS = eventEnd.getTime();
@@ -395,9 +557,29 @@ $(document).ready(async function() {
                     var html = "";
 
                     if (res.start_day === res.end_day) {
-                        html = `<div class="event event-start event-end" style="background-color: ${res.color}; color:#fff;" data-toggle="popover" data-html="true" data-placement="left" data-content='<div class="content-line"><div class="event-marking"></div><div class="title"><h5>${titleWithSummary}</h5><h6 class="reservation">${eventStart.getFullYear()}년 ${eventStart.getMonth()+1}월 ${eventStart.getDate()}일 ~ ${eventEnd.getFullYear()}년 ${eventEnd.getMonth()+1}월 ${eventEnd.getDate()}일</h6></div></div><div class="content-line"><i class="material-icons">notes</i><div class="title"><h6 class="reservation">${res.content}</h6></div>'>${titleWithSummary}</div>`;
+                        html = `<div class="event event-start event-end" style="background-color: ${res.color}; color:#fff;" data-event='${JSON.stringify(res.raw || {
+                            id: res.id,
+                            title: res.title,
+                            start_day: res.start_day,
+                            end_day: res.end_day,
+                            start_time: res.start_time,
+                            end_time: res.end_time,
+                            content: res.content,
+                            color: res.color,
+                            subtasks: res.subtasks
+                        })}'>${titleWithSummary}</div>`;
                     } else {
-                        html = `<div class="event-consecutive event-start event-end" style="background-color: ${res.color}; color:#fff;" data-toggle="popover" data-html="true" data-placement="left" data-content='<div class="content-line"><div class="event-consecutive-marking"></div><div class="title"><h5>${titleWithSummary}</h5><h6 class="reservation">${eventStart.getFullYear()}년 ${eventStart.getMonth()+1}월 ${eventStart.getDate()}일 ~ ${eventEnd.getFullYear()}년 ${eventEnd.getMonth()+1}월 ${eventEnd.getDate()}일</h6></div></div><div class="content-line"><i class="material-icons">notes</i><div class="title"><h6 class="reservation">${res.content}</h6></div>'>${titleWithSummary}</div>`;
+                        html = `<div class="event-consecutive event-start event-end" style="background-color: ${res.color}; color:#fff;" data-event='${JSON.stringify(res.raw || {
+                            id: res.id,
+                            title: res.title,
+                            start_day: res.start_day,
+                            end_day: res.end_day,
+                            start_time: res.start_time,
+                            end_time: res.end_time,
+                            content: res.content,
+                            color: res.color,
+                            subtasks: res.subtasks
+                        })}'>${titleWithSummary}</div>`;
                     }
 
                     uniqueEvents[res.id] = {
@@ -427,14 +609,12 @@ $(document).ready(async function() {
         });
 
         var weekDays = ['일', '월', '화', '수', '목', '금', '토'];
-        // Updated header:
         var header = `<span class="day-name">${d.getDate()}일 ${weekDays[d.getDay()]}요일</span>`;
         var content = header;
         eventsList.forEach(function(event) {
             content += event.html;
         });
 
-        // Render all todos in a single container, with header for the selected day
         $('#day').html(`<div class="daily-calendar">${content}</div>`);
     }
 
@@ -481,12 +661,17 @@ $(document).ready(async function() {
         $(this).addClass('selected');
     });
 
-    // Delegated event: Save button ("일정 만들기")
+    // Delegated event: Save (create/update) button
     $(document).on('click', '#create', async function() {
         const data = new FormData();
         data.append('title', $('#recipient-name').val());
-        
-        // Gather dynamic subtasks
+        data.append('start_day', $('#start-day').val());
+        data.append('end_day', $('#end-day').val());
+        data.append('start_time', $('#start-time').val());
+        data.append('end_time', $('#end-time').val());
+        data.append('content', $('#message-text').val());
+        data.append('color', selectedColor);
+        // Gather dynamic subtasks from the form
         var subtasks = [];
         $('#subtasksContainer .subtask-item').each(function() {
             var completed = $(this).find('.subtask-check').prop('checked');
@@ -495,26 +680,60 @@ $(document).ready(async function() {
         });
         data.append('subtasks', JSON.stringify(subtasks));
         
-        // Append tags and selected color
-        data.append('tags', $('#todoTags').val());
-        data.append('color', selectedColor);
+        const eventId = $('#registerSchedule').data('eventId');
+        if (eventId) {
+            await axios.put(`api/v1/calendar_update/${eventId}/`, data);
+        } else {
+            await axios.post('api/v1/calendar_create/', data);
+        }
         
-        // Append date/time fields (make sure these IDs match your modal inputs)
-        data.append('start_day', $('#start-day').val());
-        data.append('end_day', $('#end-day').val());
-        data.append('start_time', $('#start-time').val());
-        data.append('end_time', $('#end-time').val());
+        $('#registerSchedule').modal('hide');
         
-        await axios.post('api/v1/calendar_create/', data);
-        window.location.href = '/calendar';
+        // Refresh data from the server
+        await axios.get('api/v1/calendar_list/')
+            .then(res => { all_DB = res.data; });
+        
+        // Refresh the view based on the current view mode
+        if (currentView === 'daily') {
+            $('#day').empty();
+            generateDaily(currentDate);
+        } else {
+            $('#div-list').empty();
+            generateCalendar(currentDate);
+        }
     });
 
     // Delegated event: Delete button
-    $(document).on('click', '#deleteSchedule', function() {
+    $(document).on('click', '#deleteSchedule', async function() {
         if (confirm('정말 이 일정을 삭제하시겠습니까?')) {
-            // Implement deletion logic here if needed
-            console.log('Deleting schedule...');
-            $('#registerSchedule').modal('hide');
+            const eventId = $('#registerSchedule').data('eventId');
+            if (eventId) {
+                try {
+                    await axios.delete(`api/v1/calendar_delete/${eventId}/`);
+                    // Hide the modal
+                    $('#registerSchedule').modal('hide');
+                    
+                    // Clear both views
+                    $('#div-list').empty();
+                    $('#day').empty();
+                    
+                    // Refresh the data from the server
+                    await axios.get('api/v1/calendar_list/')
+                        .then(res => {
+                            all_DB = res.data;
+                        });
+                    
+                    // Regenerate the calendar based on current view mode
+                    if (currentView === 'daily') {
+                        generateDaily(currentDate);
+                    } else {
+                        generateCalendar(currentDate);
+                    }
+                } catch (error) {
+                    console.error('Error deleting event:', error);
+                    alert('일정 삭제 중 오류가 발생했습니다.');
+                }
+            }
         }
     });
 
@@ -582,6 +801,15 @@ $(document).ready(async function() {
         $('#div-list').html('');
         $('#day').html('');
         generateCalendar(currentDate);
+    });
+
+    // Update currentView when toggling between views
+    $('#view li a').on('shown.bs.tab', function (e) {
+        if (e.target.id === 'daily-tab') {
+            currentView = 'daily';
+        } else if (e.target.id === 'month-tab') {
+            currentView = 'month';
+        }
     });
 });
 

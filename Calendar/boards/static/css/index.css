@@ -256,3 +256,66 @@ a:hover {
 .color-circle.selected {
     border: 2px solid #000;
 }
+
+/* Update styles for the event grid layout */
+.event-grid {
+    display: grid;
+    grid-template-columns: auto auto auto auto auto;
+    /* gap: 10px; */
+    align-items: center;
+    /* padding: 5px; */
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.grid-title,
+.grid-summary,
+.grid-dday,
+.grid-end-date,
+.grid-start-date {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 2px 5px;
+    border-right: 1px solid rgba(255, 255, 255);
+    text-align: left;
+    min-width: 0; /* Important for text truncation */
+}
+
+.grid-title {
+    font-weight: bold;
+    min-width: 5ch; /* Minimum width for title */
+}
+
+.grid-summary {
+    color: rgba(255, 255, 255);
+    min-width: 5ch; /* Minimum width for summary */
+}
+
+.grid-dday {
+    color: rgba(255, 255, 255);
+    min-width: 5ch; /* Minimum width for d-day */
+}
+
+.grid-end-date,
+.grid-start-date {
+    color: rgba(255, 255, 255);
+    font-size: 0.9em;
+    min-width: 8ch; /* Minimum width for dates */
+}
+
+/* Ensure the event container can handle the grid layout */
+.event,
+.event-consecutive {
+    padding: 5px;
+    margin: 2px 0;
+    display: flex;
+    align-items: center;
+    height: 32px; /* Fixed height for consistency */
+}
+
+.event:hover,
+.event-consecutive:hover {
+    transform: scale(1.01);
+    transition: transform 0.2s ease;
+}
