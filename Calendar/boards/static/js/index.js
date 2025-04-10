@@ -112,7 +112,7 @@ $(document).ready(async function() {
         }
         // 배열형태 cal를 string형태로 변환
         cal = cal.reduce(function(a, b) {
-            return a.concat(b); 
+            return a.concat(b);
         }, []).join('');
         // 일정 데이터를 딕셔너리 형태로 저장, 키는 해당날짜 0000-00-00 
         var d_startdate = {}
@@ -427,7 +427,15 @@ $(document).ready(async function() {
         // 일정 클릭시 팝업으로 일정 상세내용이 나옴
         $(document).on('click', '.event, .event-consecutive, .event-repeated', function(e) {
             e.preventDefault();
-            const eventData = $(this).data('event');
+            let eventData = $(this).data('event');
+            // Parse eventData if it's a string (due to JSON string in data-event attribute)
+            if (typeof eventData === 'string') {
+                try {
+                    eventData = JSON.parse(eventData);
+                } catch (err) {
+                    console.error('Failed to parse event data:', err);
+                }
+            }
             // Clear existing subtasks
             $('#subtasksContainer').empty();
             if (eventData) {
@@ -438,18 +446,19 @@ $(document).ready(async function() {
                 $('#start-time').val(eventData.start_time);
                 $('#end-time').val(eventData.end_time);
                 $('#message-text').val(eventData.content);
-                
                 // Set the color
                 selectedColor = eventData.color;
                 $('#colorSelector .color-circle').removeClass('selected');
                 $(`#colorSelector .color-circle[data-color="${eventData.color}"]`).addClass('selected');
-                
+                // Pre-fill tags if available
+                $('#todoTags').val(eventData.tags || '');
                 // Load and render subtasks if available
                 if (eventData.subtasks && eventData.subtasks.length > 0) {
                     eventData.subtasks.forEach(function(subtask) {
                         var newRow = $("<div class='subtask-item d-flex align-items-center mb-2'>" +
                                        "<input type='checkbox' class='subtask-check mr-2'>" +
                                        "<input type='text' class='subtask-text form-control' placeholder='세부 할 일'>" +
+                                       "<button type='button' class='btn btn-danger btn-sm remove-subtask ml-2'>-</button>" +
                                        "</div>");
                         newRow.find('.subtask-check').prop('checked', subtask.completed);
                         newRow.find('.subtask-text').val(subtask.text);
@@ -457,7 +466,6 @@ $(document).ready(async function() {
                     });
                 }
                 updateSubtaskProgress();
-                
                 // Store the event ID for update/delete operations
                 $('#registerSchedule').data('eventId', eventData.id);
             }
@@ -466,10 +474,30 @@ $(document).ready(async function() {
 
         // 달력클릭시 일정작성 폼이 나옴
         $('.week, .daily-calendar').click(function(e) {
-            var cutdate = e.target.id.replaceAll('-', '/')
-            $('[name=start_day]').val(cutdate)
-            // Clear any existing event data
+            var cutdate = e.target.id.replaceAll('-', '/');
+            // Clear form fields for a new todo
+            $('#recipient-name').val('');
+            $('#start-day').val(cutdate);
+            $('#end-day').val('');
+            $('#start-time').val('');
+            $('#end-time').val('');
+            $('#message-text').val('');
+            $('#todoTags').val('');
+            
+            // Clear subtasks container
+            $('#subtasksContainer').empty();
+            
+            // Reset subtask progress indicators
+            updateSubtaskProgress();
+
+            // Reset color selection (assume no default color is selected)
+            selectedColor = '';
+            $('#colorSelector .color-circle').removeClass('selected');
+            
+            // Remove stored event ID to treat as a new event
             $('#registerSchedule').removeData('eventId');
+            
+            // Show the modal
             $('#registerSchedule').modal('show');
         });
     }
@@ -556,7 +584,7 @@ $(document).ready(async function() {
                     var subtaskRatio = (totalSubtasks > 0) ? (completedSubtasks / totalSubtasks) : 1;
                     var html = "";
 
-                    if (res.start_day === res.end_day) {
+                if (res.start_day === res.end_day) {
                         html = `<div class="event event-start event-end" style="background-color: ${res.color}; color:#fff;" data-event='${JSON.stringify(res.raw || {
                             id: res.id,
                             title: res.title,
@@ -568,7 +596,7 @@ $(document).ready(async function() {
                             color: res.color,
                             subtasks: res.subtasks
                         })}'>${titleWithSummary}</div>`;
-                    } else {
+                } else {
                         html = `<div class="event-consecutive event-start event-end" style="background-color: ${res.color}; color:#fff;" data-event='${JSON.stringify(res.raw || {
                             id: res.id,
                             title: res.title,
@@ -630,6 +658,7 @@ $(document).ready(async function() {
         var newRow = $('<div class="subtask-item d-flex align-items-center mb-2">' +
                        '<input type="checkbox" class="subtask-check mr-2">' +
                        '<input type="text" class="subtask-text form-control" placeholder="세부 할 일">' +
+                       '<button type="button" class="btn btn-danger btn-sm remove-subtask ml-2">-</button>' +
                        '</div>');
         $('#subtasksContainer').append(newRow);
         updateSubtaskProgress();
@@ -679,6 +708,8 @@ $(document).ready(async function() {
             subtasks.push({ completed: completed, text: text });
         });
         data.append('subtasks', JSON.stringify(subtasks));
+        // Append the tags from the tag input field
+        data.append('tags', $('#todoTags').val());
         
         const eventId = $('#registerSchedule').data('eventId');
         if (eventId) {
@@ -810,6 +841,12 @@ $(document).ready(async function() {
         } else if (e.target.id === 'month-tab') {
             currentView = 'month';
         }
+    });
+
+    // New delegated event: Remove subtask row when '-' button is clicked
+    $(document).on('click', '.remove-subtask', function() {
+        $(this).closest('.subtask-item').remove();
+        updateSubtaskProgress();
     });
 });
 

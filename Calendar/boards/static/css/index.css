@@ -91,7 +91,7 @@ a:hover {
     .monthly-calendar .day-name, .daily-calendar .day-name {
       font-size: 13px; } }
 .monthly-calendar .event, .monthly-calendar .event-consecutive, .monthly-calendar .event-repeated, .daily-calendar .event, .daily-calendar .event-consecutive, .daily-calendar .event-repeated {
-  margin-bottom: 4px;
+  /* margin-bottom: 4px; */
   padding: 4px 10px;
   background-color: #E9ECF3;
   color: #263747;
@@ -131,12 +131,15 @@ a:hover {
   grid-auto-flow: dense;
   grid-template-rows: 32px repeat(auto-fill, 32px) 32px;
   grid-gap: 0;
-  border-bottom: 1px solid #D7E2EB; }
+  row-gap: 4px;
+  border-bottom: 1px solid #D7E2EB; 
+}
   .week:hover {
     cursor: pointer; }
   .week .day {
     border-right: 1px solid #d7e2eb;
-    display: contents; }
+    display: contents; 
+  }
     .week .day .day-label {
       grid-row-start: 1;
       position: relative;
@@ -187,45 +190,16 @@ a:hover {
   display: grid;
   min-height: 640px;
   grid-template-columns: repeat(1, minmax(840px, 1fr));
-  grid-template-rows: 48px repeat(12, 40px) 40px;
+  grid-template-rows: 48px repeat(0, 40px) 40px;
   grid-auto-rows: inherit;
   overflow: auto;
-  border-bottom: 1px solid #D7E2EB; }
+  border-bottom: 4px solid  #ffffff; }
   .daily-calendar:hover {
     cursor: pointer; }
-  .daily-calendar .event, .daily-calendar .event-consecutive, .daily-calendar .event-repeated {
-    margin-top: 4px; }
-
-.popover {
-  min-width: 320px; }
-  .popover .bs-popover-right {
-    margin-left: 4px; }
-  .popover .popover-body {
-    padding: 16px;
-    color: #263747; }
-    .popover .popover-body .content-line {
-      display: flex;
-      align-items: flex-start; }
-      .popover .popover-body .content-line .event-marking, .popover .popover-body .content-line .event-consecutive-marking, .popover .popover-body .content-line .event-repeated-marking {
-        width: 24px;
-        height: 24px; }
-      .popover .popover-body .content-line .event-consecutive-marking {
-        border-radius: 4px;
-        background-color: #0078FF; }
-      .popover .popover-body .content-line .event-marking {
-        border-radius: 4px;
-        background-color: #D7E2EB; }
-      .popover .popover-body .content-line .event-repeated-marking {
-        border-radius: 4px;
-        background-color: #673AB7; }
-      .popover .popover-body .content-line .title {
-        margin-left: 12px; }
-        .popover .popover-body .content-line .title .reservation {
-          display: block; }
-      .popover .popover-body .content-line .material-icons {
-        color: #263747; }
-      .popover .popover-body .content-line:nth-child(2) {
-        margin-top: 16px; }
+  .daily-calendar .event, .daily-calendar .event-consecutive, .daily-calendar .event-repeated 
+  {
+    margin-top: 4px; 
+  }
 
 .modal .modal-header {
   background: #F7F7FB; }
@@ -300,7 +274,7 @@ a:hover {
 .grid-end-date,
 .grid-start-date {
     color: rgba(255, 255, 255);
-    font-size: 0.9em;
+    /* font-size: 0.9em; */
     min-width: 8ch; /* Minimum width for dates */
 }
 
@@ -308,7 +282,8 @@ a:hover {
 .event,
 .event-consecutive {
     padding: 5px;
-    margin: 2px 0;
+    /* margin: 2px 0; */
+    /* margin-top: 1px; */
     display: flex;
     align-items: center;
     height: 32px; /* Fixed height for consistency */
@@ -317,5 +292,5 @@ a:hover {
 .event:hover,
 .event-consecutive:hover {
     transform: scale(1.01);
-    transition: transform 0.2s ease;
+    transition: transform 0.1s ease;
 }

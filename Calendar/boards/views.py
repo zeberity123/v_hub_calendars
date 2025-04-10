@@ -81,7 +81,7 @@ def calendar_update(request, pk):
     event.end_time = __convert_time_display(request.data.get('end_time', event.end_time))
     event.content = request.data.get('content', event.content)
     event.color = request.data.get('color', event.color)
-    event.save()
+    event.tags = request.data.get('tags', event.tags)
     
     # Process subtasks data if provided (as a JSON string)
     subtasks_data = request.data.get('subtasks', '[]')
@@ -99,6 +99,7 @@ def calendar_update(request, pk):
         # Could log the error if needed
         pass
 
+    event.save()
     return Response(status=status.HTTP_200_OK)
 
 def __convert_day_format(day):
