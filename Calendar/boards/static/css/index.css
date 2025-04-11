@@ -188,14 +188,16 @@ a:hover {
 
 .daily-calendar {
   display: grid;
-  /* min-height: 640px; */
+  height: auto;
+  min-height: 0;
+  box-sizing: border-box;
   grid-template-columns: repeat(1, minmax(840px, 1fr));
-  grid-template-rows: 48px auto;
-  /* grid-auto-rows: 40px; */
-  align-content: start;  /* items start at the top, extra space stays at the bottom */
-  row-gap: 2px;
+  grid-auto-rows: 40px;
+  gap: 2px;
+  align-content: start !important;
+  overflow-y: visible !important;
   margin-bottom: 4px;
-  overflow: auto;
+  max-height: none;
 }
   .daily-calendar:hover {
     cursor: pointer; }
