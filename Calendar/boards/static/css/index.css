@@ -131,7 +131,7 @@ a:hover {
   grid-auto-flow: dense;
   grid-template-rows: 32px repeat(auto-fill, 32px) 32px;
   grid-gap: 0;
-  row-gap: 4px;
+  row-gap: 2px;
   border-bottom: 1px solid #D7E2EB; 
 }
   .week:hover {
@@ -188,18 +188,17 @@ a:hover {
 
 .daily-calendar {
   display: grid;
-  min-height: 640px;
+  /* min-height: 640px; */
   grid-template-columns: repeat(1, minmax(840px, 1fr));
-  grid-template-rows: 48px repeat(0, 40px) 40px;
-  grid-auto-rows: inherit;
+  grid-template-rows: 48px auto;
+  /* grid-auto-rows: 40px; */
+  align-content: start;  /* items start at the top, extra space stays at the bottom */
+  row-gap: 2px;
+  margin-bottom: 4px;
   overflow: auto;
-  border-bottom: 4px solid  #ffffff; }
+}
   .daily-calendar:hover {
     cursor: pointer; }
-  .daily-calendar .event, .daily-calendar .event-consecutive, .daily-calendar .event-repeated 
-  {
-    margin-top: 4px; 
-  }
 
 .modal .modal-header {
   background: #F7F7FB; }
@@ -235,9 +234,7 @@ a:hover {
 .event-grid {
     display: grid;
     grid-template-columns: auto auto auto auto auto;
-    /* gap: 10px; */
     align-items: center;
-    /* padding: 5px; */
     height: 100%;
     box-sizing: border-box;
 }
@@ -293,4 +290,20 @@ a:hover {
 .event-consecutive:hover {
     transform: scale(1.01);
     transition: transform 0.1s ease;
+}
+
+/* Ensure consistent height for all todo items in daily view */
+.daily-calendar > .event,
+.daily-calendar > .event-consecutive,
+.daily-calendar > .event-repeated {
+    height: 40px !important;
+}
+
+/* Force daily view todo items to have a consistent height */
+.daily-calendar .event,
+.daily-calendar .event-consecutive,
+.daily-calendar .event-repeated {
+    height: 40px !important;
+    min-height: 40px !important;
+    line-height: 40px !important;
 }
