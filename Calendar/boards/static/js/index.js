@@ -451,6 +451,9 @@ $(document).ready(async function() {
                 $('#colorSelector .color-circle').removeClass('selected');
                 $(`#colorSelector .color-circle[data-color="${eventData.color}"]`).addClass('selected');
                 // Pre-fill tags if available
+                if (!eventData.tags) {
+                    eventData.tags = $(this).find('.grid-tags').text().trim();
+                }
                 $('#todoTags').val(eventData.tags || '');
                 // Load and render subtasks if available
                 if (eventData.subtasks && eventData.subtasks.length > 0) {
