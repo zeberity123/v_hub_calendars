@@ -131,7 +131,7 @@ $(document).ready(async function() {
             
             const diff = Math.floor((diff_d2.getTime() - diff_d0.getTime()) / 1000 / 60 / 60 / 24)
             const diff_v = Math.floor((diff_d2.getTime() - diff_d1.getTime()) / 1000 / 60 / 60 / 24)
-
+            const diff_d_day = Math.floor((diff_d2.getTime() - d.getTime()) / 1000 / 60 / 60 / 24)
             // Compute summary
             var totalSubtasks = res.subtasks ? res.subtasks.length : 0;
             var completedSubtasks = 0;
@@ -139,7 +139,7 @@ $(document).ready(async function() {
                 completedSubtasks = res.subtasks.filter(function(st) { return st.completed; }).length;
             }
             var summary = " (" + completedSubtasks + "/" + totalSubtasks + ") ";
-            var d_day_str = 'D-' + (diff > 0 ? diff : '0');
+            var d_day_str = 'D-' + (diff_d_day > 0 ? diff_d_day : '0');
             var end_date_month = ''
             var end_date_day = ''
             if (!isEmpty(e_day_0[0])){
