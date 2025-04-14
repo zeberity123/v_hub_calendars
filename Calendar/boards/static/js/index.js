@@ -139,7 +139,7 @@ $(document).ready(async function() {
                 completedSubtasks = res.subtasks.filter(function(st) { return st.completed; }).length;
             }
             var summary = " (" + completedSubtasks + "/" + totalSubtasks + ") ";
-            var d_day_str = 'D-' + (diff > 0 ? diff : 'Day');
+            var d_day_str = 'D-' + (diff > 0 ? diff : '0');
             var end_date_month = ''
             var end_date_day = ''
             if (!isEmpty(e_day_0[0])){
@@ -574,8 +574,9 @@ $(document).ready(async function() {
                             <div class="grid-title" style="width: ${maxTitleLength}ch">${res.title}</div>
                             <div class="grid-summary" style="width: ${maxSummaryLength}ch">${subtaskSummary}</div>
                             <div class="grid-dday" style="width: ${maxDdayLength}ch">${d_day_str}</div>
+                            <div class="grid-end-date" style="width: 16.5ch">${end_date_str}</div>
                             <div class="grid-start-date" style="width: ${maxStartDateLength}ch">${start_date_str}</div>
-                            <div class="grid-end-date" style="width: ${maxEndDateLength}ch">${end_date_str}</div>
+                            <div class="grid-tags">${res.tags || ''}</div>
                         </div>
                     `;
 

@@ -24,7 +24,9 @@ a:hover {
   border-right: 1px solid #D7E2EB;
   border-left: 1px solid #D7E2EB;
   border-radius: 12px;
-  background: #fff; opacity: 0.95; }
+  background: #fff; 
+  opacity: 0.95;
+}
 
 .calendar-header {
   display: flex;
@@ -89,9 +91,8 @@ a:hover {
   font-weight: 600; }
   @media (max-width: 767px) {
     .monthly-calendar .day-name, .daily-calendar .day-name {
-      font-size: 13px; } }
+      font-size: 14px; } }
 .monthly-calendar .event, .monthly-calendar .event-consecutive, .monthly-calendar .event-repeated, .daily-calendar .event, .daily-calendar .event-consecutive, .daily-calendar .event-repeated {
-  /* margin-bottom: 4px; */
   padding: 4px 10px;
   background-color: #E9ECF3;
   color: #263747;
@@ -131,7 +132,7 @@ a:hover {
   grid-auto-flow: dense;
   grid-template-rows: 32px repeat(auto-fill, 32px) 32px;
   grid-gap: 0;
-  row-gap: 2px;
+  row-gap: 1px;
   border-bottom: 1px solid #D7E2EB; 
 }
   .week:hover {
@@ -192,12 +193,13 @@ a:hover {
   min-height: 0;
   box-sizing: border-box;
   grid-template-columns: repeat(1, minmax(840px, 1fr));
-  grid-auto-rows: 40px;
-  gap: 2px;
+  grid-auto-rows: 42px;
+  gap: 1px;
   align-content: start !important;
-  overflow-y: visible !important;
-  margin-bottom: 4px;
-  max-height: none;
+  overflow-y: overlay !important;
+  overflow-x: hidden;
+  margin-bottom: 2px;
+  max-height: calc(90vh - 86px);
 }
   .daily-calendar:hover {
     cursor: pointer; }
@@ -235,7 +237,7 @@ a:hover {
 /* Update styles for the event grid layout */
 .event-grid {
     display: grid;
-    grid-template-columns: auto auto auto auto auto;
+    grid-template-columns: auto auto auto 16.5ch 1fr auto;
     align-items: center;
     height: 100%;
     box-sizing: border-box;
@@ -245,6 +247,7 @@ a:hover {
 .grid-summary,
 .grid-dday,
 .grid-end-date,
+.grid-tags,
 .grid-start-date {
     white-space: nowrap;
     overflow: hidden;
@@ -308,4 +311,18 @@ a:hover {
     height: 40px !important;
     min-height: 40px !important;
     line-height: 40px !important;
+}
+
+/* Hide scrollbar for .daily-calendar */
+.daily-calendar::-webkit-scrollbar {
+    display: none;
+}
+.daily-calendar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* Remove border-right for .grid-tags */
+.grid-tags {
+    border-right: none !important;
 }
