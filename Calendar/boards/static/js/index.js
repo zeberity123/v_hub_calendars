@@ -180,10 +180,10 @@ $(document).ready(async function() {
                  startTS,                // index 12: startTS for sorting
                  endTS,                  // index 13: endTS for sorting
                  subtaskRatio,           // index 14: subtask ratio for sorting
-                 res.title               // index 15: original title for alphabetical sort
+                 res.title,               // index 15: original title for alphabetical sort
             ];
             
-            event_arr.push(res.subtasks || []);
+            event_arr.push(res.subtasks || []); // index16: subtask
             event_arr.raw = res;
             
             if (res.start_day in d_startdate) {
@@ -192,20 +192,6 @@ $(document).ready(async function() {
                  d_startdate[res.start_day] = [ event_arr ];
             }
 
-            // date_list에 시작날짜가 없어서 따로 저장하여 달력에 띄우기 위한 작업
-            if (!date_list.includes(res.start_day) && date_list.includes(res.end_day)) {
-                if (date_list[0] in d_startdate) {
-                    d_startdate[date_list[0]].push([diff_v+1, res.title, diff_d1.getDay(), true, `${diff_d0.getFullYear() + '년' + ' ' + (diff_d0.getMonth()+1) + '월' + ' ' + diff_d0.getDate() + '일'}`, `${diff_d2.getFullYear() + '년' + ' ' + (diff_d2.getMonth()+1) + '월' + ' ' + diff_d2.getDate() + '일'}`, res.start_time, res.end_time, res.content, true, res.id, res.color])
-                } else {
-                    d_startdate[date_list[0]] = [[diff_v+1, res.title, diff_d1.getDay(), true, `${diff_d0.getFullYear() + '년' + ' ' + (diff_d0.getMonth()+1) + '월' + ' ' + diff_d0.getDate() + '일'}`, `${diff_d2.getFullYear() + '년' + ' ' + (diff_d2.getMonth()+1) + '월' + ' ' + diff_d2.getDate() + '일'}`, res.start_time, res.end_time, res.content, true, res.id, res.color]]
-                }
-            } else if (diff_d0 < diff_d1 && diff_d3 < diff_d2 ) {
-                if (date_list[0] in d_startdate) {
-                    d_startdate[date_list[0]].push([36, res.title, diff_d1.getDay(), true, `${diff_d0.getFullYear() + '년' + ' ' + (diff_d0.getMonth()+1) + '월' + ' ' + diff_d0.getDate() + '일'}`, `${diff_d2.getFullYear() + '년' + ' ' + (diff_d2.getMonth()+1) + '월' + ' ' + diff_d2.getDate() + '일'}`, res.start_time, res.end_time, res.content, true, res.id, res.color])
-                } else {
-                    d_startdate[date_list[0]] = [[36, res.title, diff_d1.getDay(), true, `${diff_d0.getFullYear() + '년' + ' ' + (diff_d0.getMonth()+1) + '월' + ' ' + diff_d0.getDate() + '일'}`, `${diff_d2.getFullYear() + '년' + ' ' + (diff_d2.getMonth()+1) + '월' + ' ' + diff_d2.getDate() + '일'}`, res.start_time, res.end_time, res.content, true, res.id, res.color]]
-                }
-            }
 
         })
         // html에 띄우는 작업
@@ -227,7 +213,11 @@ $(document).ready(async function() {
                     if (a[12] !== b[12]) return b[12] - a[12];
                     else if (a[13] !== b[13]) return b[13] - a[13];
                     else if (a[14] !== b[14]) return b[14] - a[14];
-                    else return a[15].localeCompare(b[15]);
+                    else {
+                        var wafwf = 1;
+                        console.log('sdadwdafwaf', a[wafwf],b[wafwf]);
+                        return a[15].localeCompare(b[15]);
+                    }
                 } else {  // sort by end_date
                     if (a[13] !== b[13]) return b[13] - a[13];
                     else if (a[12] !== b[12]) return b[12] - a[12];
