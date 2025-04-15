@@ -118,19 +118,14 @@ $(document).ready(async function() {
         var d_startdate = {}
         await all_DB.forEach(res => {
             const s_day_0 = res.start_day.split('-')
-            const s_day = date_list[0].split('-')
             const e_day_0 = res.end_day.split('-')
-            const e_day = date_list[date_list.length - 1].split('-')
             // 연속일정인지 단일일정인지 판단
             var judge = (res.start_day === res.end_day) ? false : true;
             // 각각 해당 날짜 저장
             const diff_d0 = new Date(s_day_0[2], s_day_0[0]-1, s_day_0[1])
-            const diff_d1 = new Date(s_day[2], s_day[0]-1, s_day[1])
             const diff_d2 = new Date(e_day_0[2], e_day_0[0]-1, e_day_0[1])
-            const diff_d3 = new Date(e_day[2], e_day[0]-1, Number(e_day[1])+1)
             
             const diff = Math.floor((diff_d2.getTime() - diff_d0.getTime()) / 1000 / 60 / 60 / 24)
-            const diff_v = Math.floor((diff_d2.getTime() - diff_d1.getTime()) / 1000 / 60 / 60 / 24)
             const diff_d_day = Math.floor((diff_d2.getTime() - d.getTime()) / 1000 / 60 / 60 / 24)
             // Compute summary
             var totalSubtasks = res.subtasks ? res.subtasks.length : 0;
@@ -183,7 +178,7 @@ $(document).ready(async function() {
                  res.title,               // index 15: original title for alphabetical sort
             ];
             
-            event_arr.push(res.subtasks || []); // index16: subtask
+            event_arr.push(res.subtasks || []); // index16: subtasks
             event_arr.raw = res;
             
             if (res.start_day in d_startdate) {
@@ -191,7 +186,6 @@ $(document).ready(async function() {
             } else {
                  d_startdate[res.start_day] = [ event_arr ];
             }
-
 
         })
         // html에 띄우는 작업
@@ -214,8 +208,8 @@ $(document).ready(async function() {
                     else if (a[13] !== b[13]) return b[13] - a[13];
                     else if (a[14] !== b[14]) return b[14] - a[14];
                     else {
-                        var wafwf = 1;
-                        console.log('sdadwdafwaf', a[wafwf],b[wafwf]);
+                        // var wafwf = 1;
+                        // console.log('sdadwdafwaf', a[wafwf],b[wafwf]);
                         return a[15].localeCompare(b[15]);
                     }
                 } else {  // sort by end_date
@@ -226,6 +220,7 @@ $(document).ready(async function() {
                 }
             });
         }
+
         for (var i in date_list) {
             if (date_list[i] in d_startdate) {
                 d_startdate[date_list[i]].forEach(res => {
@@ -277,58 +272,32 @@ $(document).ready(async function() {
                                                 </h6>
                                             </div>
                                         </div>'`
+                    var brief_res_dict = {
+                        id: res[10],
+                        title: res[15],
+                        start_day: res[4],
+                        end_day: res[5],
+                        start_time: res[6],
+                        end_time: res[7],
+                        content: res[8],
+                        color: res[11],
+                        subtasks: res[16]
+                    }
+                    // console.log('data: ', res[10], JSON.stringify(res.raw || brief_res_dict));
+                    console.log('data: ', res[2], res[1], res[11], 'data_end', JSON.stringify(brief_res_dict));
+                    // console.log('data: ', res[10], JSON.stringify(res.raw));
                     if (Number(res[0]) > Number(day_cal[res[2]])) {
                         if (res[9]) {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event='${JSON.stringify(res.raw || {
-                                    id: res[10],
-                                    title: res[15],
-                                    start_day: res[4],
-                                    end_day: res[5],
-                                    start_time: res[6],
-                                    end_time: res[7],
-                                    content: res[8],
-                                    color: res[11],
-                                    subtasks: res[16]
-                                })}'>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event='${JSON.stringify(res.raw || brief_res_dict)}'>${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || {
-                                    id: res[10],
-                                    title: res[15],
-                                    start_day: res[4],
-                                    end_day: res[5],
-                                    start_time: res[6],
-                                    end_time: res[7],
-                                    content: res[8],
-                                    color: res[11],
-                                    subtasks: res[16]
-                                })}'>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || brief_res_dict)}'>${res[1]}</div>`);
                             }
                         } else {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event='${JSON.stringify(res.raw || {
-                                    id: res[10],
-                                    title: res[15],
-                                    start_day: res[4],
-                                    end_day: res[5],
-                                    start_time: res[6],
-                                    end_time: res[7],
-                                    content: res[8],
-                                    color: res[11],
-                                    subtasks: res[16]
-                                })}'>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event='${JSON.stringify(res.raw || brief_res_dict)}'>${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event='${JSON.stringify(res.raw || {
-                                    id: res[10],
-                                    title: res[15],
-                                    start_day: res[4],
-                                    end_day: res[5],
-                                    start_time: res[6],
-                                    end_time: res[7],
-                                    content: res[8],
-                                    color: res[11],
-                                    subtasks: res[16]
-                                })}'>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event='${JSON.stringify(res.raw || brief_res_dict)}'>${res[1]}</div>`);
                             }
                         }
 
@@ -358,55 +327,15 @@ $(document).ready(async function() {
                     } else {
                         if (res[9]) {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || {
-                                    id: res[10],
-                                    title: res[15],
-                                    start_day: res[4],
-                                    end_day: res[5],
-                                    start_time: res[6],
-                                    end_time: res[7],
-                                    content: res[8],
-                                    color: res[11],
-                                    subtasks: res[16]
-                                })}'>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || brief_res_dict)}'>${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || {
-                                    id: res[10],
-                                    title: res[15],
-                                    start_day: res[4],
-                                    end_day: res[5],
-                                    start_time: res[6],
-                                    end_time: res[7],
-                                    content: res[8],
-                                    color: res[11],
-                                    subtasks: res[16]
-                                })}'>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || brief_res_dict)}'>${res[1]}</div>`);
                             }
                         } else {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || {
-                                    id: res[10],
-                                    title: res[15],
-                                    start_day: res[4],
-                                    end_day: res[5],
-                                    start_time: res[6],
-                                    end_time: res[7],
-                                    content: res[8],
-                                    color: res[11],
-                                    subtasks: res[16]
-                                })}'>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || brief_res_dict)}'>${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || {
-                                    id: res[10],
-                                    title: res[15],
-                                    start_day: res[4],
-                                    end_day: res[5],
-                                    start_time: res[6],
-                                    end_time: res[7],
-                                    content: res[8],
-                                    color: res[11],
-                                    subtasks: res[16]
-                                })}'>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || brief_res_dict)}'>${res[1]}</div>`);
                             }
                         }
                     }
