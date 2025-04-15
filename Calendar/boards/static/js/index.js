@@ -18,22 +18,9 @@ $(document).ready(async function() {
     
     // calendar 만드는 함수
     async function generateCalendar(d) {
-        // currentDate는 값이 바뀔 수 있기 떄문에 따로 현재 날짜 저장
-        var todayDate = new Date()
-        // 날짜를 0000-00-00 형식으로 저장
-        var string_today
-        if (todayDate.getMonth() + 1 < 10) {
-            if (todayDate.getDate() < 10) {
-                string_today = todayDate.getFullYear() + '-' + '0' + '' + (todayDate.getMonth()+1) + '-' + '0' + todayDate.getDate()
-            } else {
-                string_today = todayDate.getFullYear() + '-' + '0' + '' + (todayDate.getMonth()+1) + '-' + todayDate.getDate()
-            }
-        } else {
-            if (todayDate.getDate() < 10) {
-                string_today = todayDate.getFullYear() + '-' + (todayDate.getMonth()+1) + '-' + '0' + todayDate.getDate()
-            } else {
-                string_today = todayDate.getFullYear() + "-" + (todayDate.getMonth()+1) + "-" + todayDate.getDate()
-            }
+        // Helper function for two-digit numbers
+        function pad(num) {
+          return num < 10 ? '0' + num : num;
         }
         
         // 날짜 계산 함수
@@ -41,27 +28,26 @@ $(document).ready(async function() {
             var d = new Date(this.getFullYear(), this.getMonth() + 1, 0);
             return d.getDate();
         };
-        // 계산하기 편하게 요번달 말 날짜, 요일, 달을 딕셔너리에 저장
+    
         var details = {
             totalDays: d.monthDays(),
             weekDays: ['일', '월', '화', '수', '목', '금', '토'],
             months: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
         };
-
-        // 달이 시작하는 요일
+    
         var start = new Date(d.getFullYear(), d.getMonth()).getDay();
-        // 이번 달에 이전 달 뒷부분 날짜를 달기위한 날짜 계산
-        var copycurrent1 = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
-        var copycurrent2 = new Date(currentDate.getFullYear(), currentDate.getMonth()+1);
-        var restday = copycurrent1.getDate() - copycurrent1.getDay()
-        // 달력을 만들기 위한 변수 cal은 html, day는 날짜, cnt는 다음달 날짜, date_list는 달력에 있는 날짜 리스트
+    
+        // 이전 달과 다음 달의 날짜를 계산하기 위한 날짜들
+        var copycurrent1 = new Date(d.getFullYear(), d.getMonth(), 0);
+        var copycurrent2 = new Date(d.getFullYear(), d.getMonth()+1);
+        var restday = copycurrent1.getDate() - copycurrent1.getDay();
+    
         var cal = [];
         var day = 1;
         var cnt = 1;
-        var date_list = []
-        // 달력 만드는 for문
+        var date_list = [];
+    
         for (var i = 0; i <= 6; i++) {
-            // i == 0일때 달력 요일을 달고, 아닐때 날짜 달기
             if (i == 0) {
                 cal.push(['<div class="week-day">']);
             } else {
@@ -71,45 +57,29 @@ $(document).ready(async function() {
                 if (i === 0) {
                     cal[i].push('<div class="day-name">' + details.weekDays[j] + '</div>');
                 } else if (day > details.totalDays) {
-                    date_list.push(copycurrent2.getMonth()+1 + '-' + '0' + cnt + '-' + copycurrent2.getFullYear())
-                    cal[i].push(`<div class="day"><h3 id="${copycurrent2.getMonth()+1 + '-' + '0' + cnt + '-' + copycurrent2.getFullYear()}" class="day-label">` + cnt++ + '</h3></div>');
+                    // Use pad for month and day for next month dates
+                    date_list.push(pad(copycurrent2.getMonth()+1) + '-' + pad(cnt) + '-' + copycurrent2.getFullYear());
+                    cal[i].push(`<div class="day"><h3 id="${pad(copycurrent2.getMonth()+1)}-${pad(cnt)}-${copycurrent2.getFullYear()}" class="day-label">` + cnt++ + '</h3></div>');
                 } else {
                     if (i === 1 && j < start) {
-                        if (copycurrent1.getMonth()+1 < 10) {
-                            date_list.push('0' + '' + (copycurrent1.getMonth()+1) + '-' + restday + '-' + copycurrent1.getFullYear())
-                            cal[i].push(`<div class="day"><h3 id="${'0' + '' + (copycurrent1.getMonth()+1) + '-' + restday + '-' + copycurrent1.getFullYear()}" class="day-label">` + restday++ + '</h3></div>');
-                        } else {
-                            date_list.push(copycurrent1.getMonth()+1 + '-' + restday + '-' + copycurrent1.getFullYear())
-                            cal[i].push(`<div class="day"><h3 id="${copycurrent1.getMonth()+1 + '-' + restday + '-' + copycurrent1.getFullYear()}" class="day-label">` + restday++ + '</h3></div>');
-                        }
+                        // For previous month dates
+                        let prevMonth = pad(copycurrent1.getMonth()+1);
+                        date_list.push(prevMonth + '-' + pad(restday) + '-' + copycurrent1.getFullYear());
+                        cal[i].push(`<div class="day"><h3 id="${prevMonth}-${pad(restday)}-${copycurrent1.getFullYear()}" class="day-label">` + restday++ + '</h3></div>');
                     } else {
-                        if (d.getMonth()+1 < 10) {
-                            if (day < 10) {
-                                date_list.push('0' + '' + (d.getMonth()+1) + '-' + '0' + day + '-' + d.getFullYear())
-                                cal[i].push(`<div class="day"><h3 id="${'0' + '' + (d.getMonth()+1) + '-' + '0' + day + '-' + d.getFullYear()}" class="day-label">` + day++ + '</h3></div>');
-                            } else {
-                                date_list.push('0' + '' + (d.getMonth()+1) + '-' + day + '-' + d.getFullYear())
-                                cal[i].push(`<div class="day"><h3 id="${'0' + '' + (d.getMonth()+1) + '-' + day + '-' + d.getFullYear()}" class="day-label">` + day++ + '</h3></div>');
-                            }
-                        } else {
-                            if (day < 10) {
-                                date_list.push(d.getMonth()+1 + '-' + '0' + day + '-' + d.getFullYear())
-                                cal[i].push(`<div class="day"><h3 id="${d.getMonth()+1 + '-' + '0' + day + '-' + d.getFullYear()}" class="day-label">` + day++ + '</h3></div>');
-                            } else {
-                                date_list.push(d.getMonth()+1 + '-' + day + '-' + d.getFullYear())
-                                cal[i].push(`<div class="day"><h3 id="${d.getMonth()+1 + '-' + day + '-' + d.getFullYear()}" class="day-label">` + day++ + '</h3></div>');
-                            }
-                        }
+                        // For current month dates
+                        let currentMonth = pad(d.getMonth()+1);
+                        date_list.push(currentMonth + '-' + pad(day) + '-' + d.getFullYear());
+                        cal[i].push(`<div class="day"><h3 id="${currentMonth}-${pad(day)}-${d.getFullYear()}" class="day-label">` + day++ + '</h3></div>');
                     }
                 }
             }
-            
             cal[i].push('</div>');
-
             if (day > details.totalDays) {
                 break;
             }
         }
+
         // 배열형태 cal를 string형태로 변환
         cal = cal.reduce(function(a, b) {
             return a.concat(b);
@@ -117,10 +87,11 @@ $(document).ready(async function() {
         // 일정 데이터를 딕셔너리 형태로 저장, 키는 해당날짜 0000-00-00 
         var d_startdate = {}
         await all_DB.forEach(res => {
-            const s_day_0 = res.start_day.split('-')
-            const e_day_0 = res.end_day.split('-')
+            const s_day_0 = res.start_day.split('-');
+            const e_day_0 = res.end_day.split('-');
             // 연속일정인지 단일일정인지 판단
-            var judge = (res.start_day === res.end_day) ? false : true;
+            var is_continuous = (res.start_day === res.end_day) ? false : true;
+            // console.log(`st:${res.start_day}, en:${res.end_day}, is_con:${is_continuous}`)
             // 각각 해당 날짜 저장
             const diff_d0 = new Date(s_day_0[2], s_day_0[0]-1, s_day_0[1])
             const diff_d2 = new Date(e_day_0[2], e_day_0[0]-1, e_day_0[1])
@@ -145,7 +116,7 @@ $(document).ready(async function() {
             
             if (!isEmpty(e_day_0[0])){
                 var end_date_day = e_day_0[1].replace(/^0+/, '');
-            } else {
+                } else {
                 end_date_day = '*'
             }
             var end_date_str = end_date_month + "월 " + end_date_day + "일";
@@ -157,34 +128,37 @@ $(document).ready(async function() {
             var endTS = diff_d2.getTime();
             // Compute subtask ratio (if there are no subtasks, treat as 1)
             var subtaskRatio = (totalSubtasks > 0) ? (completedSubtasks / totalSubtasks) : 1;
-
+            
             // Push array including extra sorting keys:
             var event_arr = [
                  diff+1,                 // index 0: event length (not used in sort)
                  titleWithSummary,       // index 1: title with appended summary and d-day/end date string
                  diff_d0.getDay(),       // index 2: starting weekday (not used in sort)
                  false,                  // index 3: some flag (not used in sort)
-                 `${diff_d0.getFullYear()}년 ${diff_d0.getMonth()+1}월 ${diff_d0.getDate()}일`, // index 4: formatted start (for display)
-                 `${diff_d2.getFullYear()}년 ${diff_d2.getMonth()+1}월 ${diff_d2.getDate()}일`, // index 5: formatted end (for display)
+                //  `${diff_d0.getMonth()+1}-${diff_d0.getDate()}-${diff_d0.getFullYear()}`, // index 4: formatted start (for display)
+                //  `${diff_d2.getMonth()+1}-${diff_d2.getDate()}-${diff_d2.getFullYear()}`, // index 5: formatted end (for display)
+                 res.start_day,
+                 res.end_day,
                  res.start_time,         // index 6: start time
                  res.end_time,           // index 7: end time
                  res.content,            // index 8: content
-                 judge,                  // index 9: judge flag
+                 is_continuous,          // index 9: is_continuous flag
                  res.id,                 // index 10: id
                  res.color,              // index 11: color
                  startTS,                // index 12: startTS for sorting
                  endTS,                  // index 13: endTS for sorting
                  subtaskRatio,           // index 14: subtask ratio for sorting
                  res.title,               // index 15: original title for alphabetical sort
+                 res.tags                //index 16: tags
             ];
             
-            event_arr.push(res.subtasks || []); // index16: subtasks
+            event_arr.push(res.subtasks || []); // index17: subtasks
             event_arr.raw = res;
             
             if (res.start_day in d_startdate) {
-                 d_startdate[res.start_day].push(event_arr);
-            } else {
-                 d_startdate[res.start_day] = [ event_arr ];
+                d_startdate[res.start_day].push(event_arr);
+                } else {
+                d_startdate[res.start_day] = [ event_arr ];
             }
 
         })
@@ -197,8 +171,7 @@ $(document).ready(async function() {
         }).mouseout(function() {
             $(this).removeClass('hover');
         });
-        //month_view
-        generateDaily(d)
+        
         // date_content 값 생성 및 일정 html 달력에 추가작업
         var day_cal = ['7', '6', '5', '4', '3', '2', '1']
         for (var key in d_startdate) {
@@ -208,8 +181,6 @@ $(document).ready(async function() {
                     else if (a[13] !== b[13]) return b[13] - a[13];
                     else if (a[14] !== b[14]) return b[14] - a[14];
                     else {
-                        // var wafwf = 1;
-                        // console.log('sdadwdafwaf', a[wafwf],b[wafwf]);
                         return a[15].localeCompare(b[15]);
                     }
                 } else {  // sort by end_date
@@ -233,17 +204,17 @@ $(document).ready(async function() {
                         end_time: res[7],
                         content: res[8],
                         color: res[11],
-                        subtasks: res[16]
+                        subtasks: res[17],
+                        tags: res[16]
                     }
-                    // console.log('data: ', res[10], JSON.stringify(res.raw || brief_res_dict));
-                    // console.log('data: ', res[2], res[1], res[11], 'data_end', JSON.stringify(brief_res_dict));
-                    console.log('data: ', res[10], JSON.stringify(res.raw));
+                    
                     if (Number(res[0]) > Number(day_cal[res[2]])) {
+                        console.log(`remain_date(0):${res[0]}`, `starting_week(2):${res[2]}`, `day_cal:${day_cal[res[2]]}`, `name:${res[15]}`, `is_con(9):${res[9]}`, `flag(3):${res[3]}`)
                         if (res[9]) {
                             if (res[3]) {
                                 $(`#${date_list[i]}`).after(`<div class="event event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event='${JSON.stringify(res.raw || brief_res_dict)}'>${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || brief_res_dict)}'>${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event='${JSON.stringify(res.raw || brief_res_dict)}'>${res[1]}</div>`);
                             }
                         } else {
                             if (res[3]) {
@@ -270,13 +241,16 @@ $(document).ready(async function() {
     
                         }
 
+                        var s_new_date_data = [Number(res[0]) - Number(day_cal[res[2]]), res[1], 0, true, res[4], res[5], res[6], res[7], res[8], res[9], res[10], res[11], res[12], res[13], res[14], res[15], res[16], res[17]]
                         if (s_new_date in d_startdate) {
-                            d_startdate[s_new_date].push([Number(res[0]) - Number(day_cal[res[2]]), res[1], 0, true, res[4], res[5], res[6], res[7], res[8], res[9], res[11], res[11]])
+                            // console.log('old push: ', s_new_date_data)
+                            d_startdate[s_new_date].push(s_new_date_data)
                         } else {
-                            d_startdate[s_new_date] = [[Number(res[0]) - Number(day_cal[res[2]]), res[1], 0, true, res[4], res[5], res[6], res[7], res[8], res[9], res[11], res[11]]]
+                            // console.log('new date: ', s_new_date_data)
+                            d_startdate[s_new_date] = [s_new_date_data]
                         }
-
                     } else {
+                        console.log(`eeeelse(0):${res[0]}`, `starting_week(2):${res[2]}`, `day_cal:${day_cal[res[2]]}`, `name:${res[15]}`, `is_con:${res[9]}`, `flag:${res[3]}`)
                         if (res[9]) {
                             if (res[3]) {
                                 $(`#${date_list[i]}`).after(`<div class="event event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || brief_res_dict)}'>${res[1]}</div>`);
@@ -294,6 +268,7 @@ $(document).ready(async function() {
                 })
             }
         }
+        console.log('ddd', d_startdate)
 
         // 일정 클릭시 팝업으로 일정 상세내용이 나옴
         $(document).on('click', '.event, .event-consecutive, .event-repeated', function(e) {
@@ -374,6 +349,7 @@ $(document).ready(async function() {
             // Show the modal
             $('#registerSchedule').modal('show');
         });
+        generateDaily(d)
     }
     //day_view
     async function generateDaily(d) {
@@ -442,14 +418,15 @@ $(document).ready(async function() {
                     var end_date_str = '마감일: ' + (eventEnd.getMonth() + 1) + "월 " + eventEnd.getDate() + "일";
                     var start_date_str = '시작일: ' + (eventStart.getMonth() + 1) + "월 " + eventStart.getDate() + "일";
 
+                    
                     // Create grid layout with fixed-width columns
                     var titleWithSummary = `
                         <div class="event-grid">
                             <div class="grid-title" style="width: ${maxTitleLength}ch">${res.title}</div>
                             <div class="grid-summary" style="width: ${maxSummaryLength}ch">${subtaskSummary}</div>
                             <div class="grid-dday" style="width: ${maxDdayLength}ch">${d_day_str}</div>
-                            <div class="grid-end-date" style="width: 16.5ch">${end_date_str}</div>
                             <div class="grid-start-date" style="width: ${maxStartDateLength}ch">${start_date_str}</div>
+                            <div class="grid-end-date" style="width: 16.5ch">${end_date_str}</div>                            
                             <div class="grid-tags">${res.tags || ''}</div>
                         </div>
                     `;
@@ -461,7 +438,7 @@ $(document).ready(async function() {
 
                 if (res.start_day === res.end_day) {
                         html = `<div class="event event-start event-end" style="background-color: ${res.color}; color:#fff;" data-event='${JSON.stringify(res.raw || {
-                            id: res.id,
+                            id: res. id,
                             title: res.title,
                             start_day: res.start_day,
                             end_day: res.end_day,
@@ -722,6 +699,16 @@ $(document).ready(async function() {
     $(document).on('click', '.remove-subtask', function() {
         $(this).closest('.subtask-item').remove();
         updateSubtaskProgress();
+    });
+
+    /* Modal accessibility fix: ensure that when the modal is hidden, its focused elements are blurred and it is marked as inert, and when shown, the inert attribute is removed */
+    $('#registerSchedule').on('hide.bs.modal', function() {
+        $(this).find(':focus').blur();
+        $(this).attr('inert', 'true').removeAttr('aria-hidden');
+    });
+
+    $('#registerSchedule').on('show.bs.modal', function() {
+        $(this).removeAttr('inert');
     });
 });
 
