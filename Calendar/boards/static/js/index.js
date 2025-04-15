@@ -224,54 +224,6 @@ $(document).ready(async function() {
         for (var i in date_list) {
             if (date_list[i] in d_startdate) {
                 d_startdate[date_list[i]].forEach(res => {
-                    var data_content_consecutive = `'<div class="content-line">
-                                                        <div class="event-consecutive-marking">
-                                                        </div>
-                                                        <div class="title">
-                                                            <h5>${res[1]}</h5>
-                                                            <h6 class="reservation">
-                                                                ${res[4] + " " + "~" + " " + res[5]}
-                                                            </h6>
-                                                            <span class="reservation-time">
-                                                                ⋅${res[6] + "~" + res[7]}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="content-line">
-                                                        <i class="material-icons">
-                                                            notes
-                                                        </i>
-                                                        <div class="title">
-                                                            <h6 class="reservation">
-                                                                ${res[8]}
-                                                            </h6>
-                                                        </div>
-                                                        <hr>
-                                                        <button type="button" class="btn btn-danger delete">수정</button>
-                                                    </div>'`
-                    var data_content = `'<div class="content-line">
-                                            <div class="event-marking">
-                                            </div>
-                                            <div class="title">
-                                                <h5>${res[1]}</h5>
-                                                <h6 class="reservation">
-                                                    ${res[4] + " " + "~" + " " + res[5]}
-                                                </h6>
-                                                <span class="reservation-time">
-                                                    ⋅${res[6] + "~" + res[7]}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="content-line">
-                                            <i class="material-icons">
-                                                notes
-                                            </i>
-                                            <div class="title">
-                                                <h6 class="reservation">
-                                                    ${res[8]}
-                                                </h6>
-                                            </div>
-                                        </div>'`
                     var brief_res_dict = {
                         id: res[10],
                         title: res[15],
@@ -284,8 +236,8 @@ $(document).ready(async function() {
                         subtasks: res[16]
                     }
                     // console.log('data: ', res[10], JSON.stringify(res.raw || brief_res_dict));
-                    console.log('data: ', res[2], res[1], res[11], 'data_end', JSON.stringify(brief_res_dict));
-                    // console.log('data: ', res[10], JSON.stringify(res.raw));
+                    // console.log('data: ', res[2], res[1], res[11], 'data_end', JSON.stringify(brief_res_dict));
+                    console.log('data: ', res[10], JSON.stringify(res.raw));
                     if (Number(res[0]) > Number(day_cal[res[2]])) {
                         if (res[9]) {
                             if (res[3]) {
