@@ -286,6 +286,7 @@ $(document).ready(async function() {
         // 일정 클릭시 팝업으로 일정 상세내용이 나옴
         $(document).on('click', '.event, .event-consecutive, .event-repeated', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             let eventData = $(this).data('event');
             // Parse eventData if it's a string (due to JSON string in data-event attribute)
             if (typeof eventData === 'string') {
@@ -335,32 +336,41 @@ $(document).ready(async function() {
         });
 
         // 달력클릭시 일정작성 폼이 나옴
-        $('.week, .daily-calendar').click(function(e) {
-            var cutdate = e.target.id.replaceAll('-', '/');
-            // Clear form fields for a new todo
-            $('#recipient-name').val('');
+        $(document).on('click', '.week', function (e) {
+       
+            /* ---------------------------------------------------------
+               Which column inside this .week was clicked?
+               --------------------------------------------------------- */
+            const weekRect   = this.getBoundingClientRect();
+            const colWidth   = weekRect.width / 7;               // 7 columns
+            const offsetX    = e.clientX - weekRect.left;        // px from left edge
+            const colIndex   = Math.floor(offsetX / colWidth);   // 0 → 6
+        
+            /* ---------------------------------------------------------
+               Grab that column’s <h3 class="day‑label"> and its id
+               --------------------------------------------------------- */
+            const $dayLabel  = $(this)                 //  <div class="week">
+                               .children('.day')       //  all seven <div class="day">
+                               .eq(colIndex)           //  the N‑th one
+                               .find('h3.day-label');  //  its header
+            const dateId     = $dayLabel.attr('id');   //  "05-02-2025"
+        
+            if (!dateId) return;                       // safety guard
+        
+            const cutdate    = dateId.replaceAll('-', '/');
+        
+            /* -------- open “new todo” modal pre‑filled with that date ------- */
+            $('#recipient-name, #end-day, #start-time, #end-time, #message-text, #todoTags')
+                .val('');
             $('#start-day').val(cutdate);
-            $('#end-day').val('');
-            $('#start-time').val('');
-            $('#end-time').val('');
-            $('#message-text').val('');
-            $('#todoTags').val('');
-            
-            // Clear subtasks container
             $('#subtasksContainer').empty();
-            
-            // Reset subtask progress indicators
             updateSubtaskProgress();
-
-            // Reset color selection (assume no default color is selected)
+        
             selectedColor = '';
             $('#colorSelector .color-circle').removeClass('selected');
-            
-            // Remove stored event ID to treat as a new event
-            $('#registerSchedule').removeData('eventId');
-            
-            // Show the modal
-            $('#registerSchedule').modal('show');
+            $('#registerSchedule')
+                .removeData('eventId')
+                .modal('show');
         });
         generateDaily(d_daily)
     }
