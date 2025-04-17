@@ -337,6 +337,7 @@ $(document).ready(async function() {
 
         // 달력클릭시 일정작성 폼이 나옴
         $(document).on('click', '.week', function (e) {
+            console.log(e)
        
             /* ---------------------------------------------------------
                Which column inside this .week was clicked?
