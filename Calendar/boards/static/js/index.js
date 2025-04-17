@@ -80,6 +80,17 @@ $(document).ready(async function() {
             }
         }
 
+        // Return the earliest date in `date_list` that falls inside [startTS, endTS].
+        // If the event is completely outside the current view, return null.
+        function firstVisibleKey(date_list, startTS, endTS) {
+            for (let i = 0; i < date_list.length; i++) {
+                const [m, d, y] = date_list[i].split('-').map(Number);
+                const ts = new Date(y, m - 1, d).getTime();
+                if (ts >= startTS && ts <= endTS) return date_list[i];
+            }
+            return null;
+        }
+
         // 배열형태 cal를 string형태로 변환
         cal = cal.reduce(function(a, b) {
             return a.concat(b);
@@ -87,80 +98,66 @@ $(document).ready(async function() {
         // 일정 데이터를 딕셔너리 형태로 저장, 키는 해당날짜 0000-00-00 
         var d_startdate = {}
         await all_DB.forEach(res => {
-            const s_day_0 = res.start_day.split('-');
-            const e_day_0 = res.end_day.split('-');
-            // 연속일정인지 단일일정인지 판단
-            var is_continuous = (res.start_day === res.end_day) ? false : true;
-            // console.log(`st:${res.start_day}, en:${res.end_day}, is_con:${is_continuous}`)
-            // 각각 해당 날짜 저장
-            const diff_d0 = new Date(s_day_0[2], s_day_0[0]-1, s_day_0[1])
-            const diff_d2 = new Date(e_day_0[2], e_day_0[0]-1, e_day_0[1])
-            
-            const diff = Math.floor((diff_d2.getTime() - diff_d0.getTime()) / 1000 / 60 / 60 / 24)
-            const diff_d_day = Math.floor((diff_d2.getTime() - d.getTime()) / 1000 / 60 / 60 / 24)
-            // Compute summary
-            var totalSubtasks = res.subtasks ? res.subtasks.length : 0;
-            var completedSubtasks = 0;
-            if (res.subtasks) {
-                completedSubtasks = res.subtasks.filter(function(st) { return st.completed; }).length;
-            }
-            var summary = " (" + completedSubtasks + "/" + totalSubtasks + ") ";
-            var d_day_str = 'D-' + (diff_d_day > 0 ? diff_d_day : '0');
-            var end_date_month = ''
-            var end_date_day = ''
-            if (!isEmpty(e_day_0[0])){
-                var end_date_month = e_day_0[0].replace(/^0+/, '');
-            } else {
-                end_date_month = '*'
-            }
-            
-            if (!isEmpty(e_day_0[0])){
-                var end_date_day = e_day_0[1].replace(/^0+/, '');
-                } else {
-                end_date_day = '*'
-            }
-            var end_date_str = end_date_month + "월 " + end_date_day + "일";
-            var toggle_str = toggle_d_day_status ? d_day_str : end_date_str;
-            var titleWithSummary = res.title + summary +  toggle_str;
+            const [sm, sd, sy] = res.start_day.split('-').map(Number);   // mm‑dd‑yyyy
+            const [em, ed, ey] = res.end_day.split('-').map(Number);
 
-            // Compute start and end timestamps:
-            var startTS = diff_d0.getTime();
-            var endTS = diff_d2.getTime();
-            // Compute subtask ratio (if there are no subtasks, treat as 1)
-            var subtaskRatio = (totalSubtasks > 0) ? (completedSubtasks / totalSubtasks) : 1;
-            
-            // Push array including extra sorting keys:
-            var event_arr = [
-                 diff+1,                 // index 0: event length (not used in sort)
-                 titleWithSummary,       // index 1: title with appended summary and d-day/end date string
-                 diff_d0.getDay(),       // index 2: starting weekday (not used in sort)
-                 false,                  // index 3: some flag (not used in sort)
-                //  `${diff_d0.getMonth()+1}-${diff_d0.getDate()}-${diff_d0.getFullYear()}`, // index 4: formatted start (for display)
-                //  `${diff_d2.getMonth()+1}-${diff_d2.getDate()}-${diff_d2.getFullYear()}`, // index 5: formatted end (for display)
-                 res.start_day,
-                 res.end_day,
-                 res.start_time,         // index 6: start time
-                 res.end_time,           // index 7: end time
-                 res.content,            // index 8: content
-                 is_continuous,          // index 9: is_continuous flag
-                 res.id,                 // index 10: id
-                 res.color,              // index 11: color
-                 startTS,                // index 12: startTS for sorting
-                 endTS,                  // index 13: endTS for sorting
-                 subtaskRatio,           // index 14: subtask ratio for sorting
-                 res.title,               // index 15: original title for alphabetical sort
-                 res.tags                //index 16: tags
+            const startObj = new Date(sy, sm - 1, sd);
+            const endObj   = new Date(ey, em - 1, ed);
+            const startTS  = startObj.getTime();
+            const endTS    = endObj  .getTime();
+            const totalLen = Math.floor((endTS - startTS) / 86400000) + 1;   // days inclusive
+
+            // ------------------------------------------------------------
+            // 1️⃣  Which date in *this* month’s grid should act as “start”?
+            // ------------------------------------------------------------
+            const visibleKey = firstVisibleKey(date_list, startTS, endTS);
+            if (!visibleKey) return;   // event is completely outside the view – skip
+
+            // Re‑compute weekday & remaining length starting from that visible key
+            const [vkM, vkD, vkY] = visibleKey.split('-').map(Number);
+            const visObj      = new Date(vkY, vkM - 1, vkD);
+            const offsetDays  = Math.floor((visObj.getTime() - startTS) / 86400000);
+            const remaining   = totalLen - offsetDays;          // how many days left to paint
+
+            // Flag: true if this is *not* the real first segment
+            const isContinuation = offsetDays > 0;
+
+            // ------------------------------------------------------------
+            // 2️⃣  Build event_arr   (unchanged fields omitted for clarity)
+            // ------------------------------------------------------------
+            const totalSubtasks  = res.subtasks ? res.subtasks.length : 0;
+            const doneSubtasks   = res.subtasks ? res.subtasks.filter(st => st.completed).length : 0;
+            const summary        = ` (${doneSubtasks}/${totalSubtasks}) `;
+            const dday           = Math.max(0, Math.floor((endTS - currentDate.getTime())/86400000));
+            const titleWithSum   = `${res.title}${summary}${toggle_d_day_status ? ' D-' + dday : (em + '월 ' + ed + '일')}`;
+
+            const event_arr = [
+                remaining,               // 0  – length *from visibleKey*
+                titleWithSum,            // 1
+                visObj.getDay(),         // 2  – weekday of *visible* segment
+                isContinuation,          // 3  – tells renderer “this is a mid‑chunk”
+                res.start_day,           // 4
+                res.end_day,             // 5
+                res.start_time,          // 6
+                res.end_time,            // 7
+                res.content,             // 8
+                totalLen > 1,            // 9  – is_continuous flag (unchanged)
+                res.id,                  // 10
+                res.color,               // 11
+                startTS,                 // 12
+                endTS,                   // 13
+                totalSubtasks ? doneSubtasks/totalSubtasks : 1, // 14
+                res.title,               // 15
+                res.tags                 // 16
             ];
-            
-            event_arr.push(res.subtasks || []); // index17: subtasks
-            event_arr.raw = res;
-            
-            if (res.start_day in d_startdate) {
-                d_startdate[res.start_day].push(event_arr);
-                } else {
-                d_startdate[res.start_day] = [ event_arr ];
-            }
+            event_arr.push(res.subtasks || []); // 17
 
+            // ------------------------------------------------------------
+            // 3️⃣  Store under the *visible* key
+            // ------------------------------------------------------------
+            if (visibleKey in d_startdate) d_startdate[visibleKey].push(event_arr);
+            else                           d_startdate[visibleKey] = [event_arr];
+            
         })
         // html에 띄우는 작업
         $('#div-list').append(cal);
