@@ -5,9 +5,9 @@ $(document).ready(async function() {
     var toggle_sort_mode = true;
     // 현재날짜 저장
     var currentDate = new Date();
+    var currentDate_daily = new Date();
 
-    // Add a global variable to track the current view mode
-    var currentView = 'month'; // default to month view
+    var currentView = 'month';
 
     // DB에 있는 모든 데이터 저장
     var all_DB
@@ -17,7 +17,7 @@ $(document).ready(async function() {
         })
     
     // calendar 만드는 함수
-    async function generateCalendar(d) {
+    async function generateCalendar(d, d_daily) {
         // Helper function for two-digit numbers
         function pad(num) {
           return num < 10 ? '0' + num : num;
@@ -206,7 +206,7 @@ $(document).ready(async function() {
                     }
                     
                     if (Number(res[0]) > Number(day_cal[res[2]])) {
-                        console.log(`remain_date(0):${res[0]}`, `starting_week(2):${res[2]}`, `day_cal:${day_cal[res[2]]}`, `name:${res[15]}`, `is_con(9):${res[9]}`, `flag(3):${res[3]}`)
+                        // console.log(`remain_date(0):${res[0]}`, `starting_week(2):${res[2]}`, `day_cal:${day_cal[res[2]]}`, `name:${res[15]}`, `is_con(9):${res[9]}`, `flag(3):${res[3]}`)
                         if (res[9]) {
                             if (res[3]) {
                                 $(`#${date_list[i]}`).after(`<div class="event event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event='${JSON.stringify(res.raw || brief_res_dict)}'>${res[1]}</div>`);
@@ -240,14 +240,12 @@ $(document).ready(async function() {
 
                         var s_new_date_data = [Number(res[0]) - Number(day_cal[res[2]]), res[1], 0, true, res[4], res[5], res[6], res[7], res[8], res[9], res[10], res[11], res[12], res[13], res[14], res[15], res[16], res[17]]
                         if (s_new_date in d_startdate) {
-                            // console.log('old push: ', s_new_date_data)
                             d_startdate[s_new_date].push(s_new_date_data)
                         } else {
-                            // console.log('new date: ', s_new_date_data)
                             d_startdate[s_new_date] = [s_new_date_data]
                         }
                     } else {
-                        console.log(`eeeelse(0):${res[0]}`, `starting_week(2):${res[2]}`, `day_cal:${day_cal[res[2]]}`, `name:${res[15]}`, `is_con:${res[9]}`, `flag:${res[3]}`)
+                        // console.log(`eeeelse(0):${res[0]}`, `starting_week(2):${res[2]}`, `day_cal:${day_cal[res[2]]}`, `name:${res[15]}`, `is_con:${res[9]}`, `flag:${res[3]}`)
                         if (res[9]) {
                             if (res[3]) {
                                 $(`#${date_list[i]}`).after(`<div class="event event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event='${JSON.stringify(res.raw || brief_res_dict)}'>${res[1]}</div>`);
@@ -265,7 +263,6 @@ $(document).ready(async function() {
                 })
             }
         }
-        console.log('ddd', d_startdate)
 
         // 일정 클릭시 팝업으로 일정 상세내용이 나옴
         $(document).on('click', '.event, .event-consecutive, .event-repeated', function(e) {
@@ -346,14 +343,14 @@ $(document).ready(async function() {
             // Show the modal
             $('#registerSchedule').modal('show');
         });
-        generateDaily(d)
+        generateDaily(d_daily)
     }
     //day_view
-    async function generateDaily(d) {
-        var current_day = new Date(d);
+    async function generateDaily(d_daily) {
+        var current_day = new Date(d_daily);
         current_day.setDate(current_day.getDate());
-        var startRange = new Date(d);
-        var endRange = new Date(d);
+        var startRange = new Date(d_daily);
+        var endRange = new Date(d_daily);
         endRange.setDate(endRange.getDate() + 30);
         var uniqueEvents = {};
 
@@ -379,7 +376,7 @@ $(document).ready(async function() {
                         completedSubtasks = res.subtasks.filter(function(st) { return st.completed; }).length;
                     }
                     var subtaskSummary = "(" + completedSubtasks + "/" + totalSubtasks + ")";
-                    var remaining = Math.floor((eventEnd.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+                    var remaining = Math.floor((eventEnd.getTime() - d_daily.getTime()) / (1000 * 60 * 60 * 24));
                     var d_day_str = 'D-' + (remaining > 0 ? remaining : '0');
                     var end_date_str = '마감일: ' + (eventEnd.getMonth() + 1) + "월 " + eventEnd.getDate() + "일";
                     var start_date_str = '시작일: ' + (eventStart.getMonth() + 1) + "월 " + eventStart.getDate() + "일";
@@ -410,7 +407,7 @@ $(document).ready(async function() {
                         completedSubtasks = res.subtasks.filter(function(st) { return st.completed; }).length;
                     }
                     var subtaskSummary = " (" + completedSubtasks + "/" + totalSubtasks + ") ";
-                    var remaining = Math.floor((eventEnd.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+                    var remaining = Math.floor((eventEnd.getTime() - d_daily.getTime()) / (1000 * 60 * 60 * 24));
                     var d_day_str = 'D-' + (remaining > 0 ? remaining : '0');
                     var end_date_str = '마감일: ' + (eventEnd.getMonth() + 1) + "월 " + eventEnd.getDate() + "일";
                     var start_date_str = '시작일: ' + (eventStart.getMonth() + 1) + "월 " + eventStart.getDate() + "일";
@@ -486,7 +483,7 @@ $(document).ready(async function() {
         });
 
         var weekDays = ['일', '월', '화', '수', '목', '금', '토'];
-        var header = `<span class="day-name">${d.getDate()}일 ${weekDays[d.getDay()]}요일</span>`;
+        var header = `<span class="day-name">${d_daily.getDate()}일 ${weekDays[d_daily.getDay()]}요일</span>`;
         var content = header;
         eventsList.forEach(function(event) {
             content += event.html;
@@ -533,7 +530,7 @@ $(document).ready(async function() {
 
     // Delegated event: Color selection - highlight and record the selected color
     $(document).on('click', '#colorSelector .color-circle', function() {
-        console.log('Color clicked: ', $(this).data('color'));
+        // console.log('Color clicked: ', $(this).data('color'));
         selectedColor = $(this).data('color');
         $('#colorSelector .color-circle').removeClass('selected');
         $(this).addClass('selected');
@@ -573,14 +570,8 @@ $(document).ready(async function() {
         await axios.get('api/v1/calendar_list/')
             .then(res => { all_DB = res.data; });
         
-        // Refresh the view based on the current view mode
-        if (currentView === 'daily') {
-            $('#day').empty();
-            generateDaily(currentDate);
-        } else {
-            $('#div-list').empty();
-            generateCalendar(currentDate);
-        }
+        $('#div-list').empty();
+        generateCalendar(currentDate, currentDate_daily);
     });
 
     // Delegated event: Delete button
@@ -603,12 +594,7 @@ $(document).ready(async function() {
                             all_DB = res.data;
                         });
                     
-                    // Regenerate the calendar based on current view mode
-                    if (currentView === 'daily') {
-                        generateDaily(currentDate);
-                    } else {
-                        generateCalendar(currentDate);
-                    }
+                    generateCalendar(currentDate, currentDate_daily);
                 } catch (error) {
                     console.error('Error deleting event:', error);
                     alert('일정 삭제 중 오류가 발생했습니다.');
@@ -621,8 +607,12 @@ $(document).ready(async function() {
     $('#todaymove').click(function() {
         $('#div-list').text('');
         $('#day').text('');
-        currentDate = new Date()
-        generateCalendar(currentDate);
+        if ($( '.nav-link' ).attr( 'aria-selected' ) === 'true'){
+            currentDate = new Date();
+        } else {
+            currentDate_daily = new Date();
+        }
+        generateCalendar(currentDate, currentDate_daily);
     });
 
     // 달, 일에 따라 날짜 이동
@@ -631,23 +621,21 @@ $(document).ready(async function() {
         $('#day').text('');
         if ($( '.nav-link' ).attr( 'aria-selected' ) === 'true') {
             currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
-            generateCalendar(currentDate);
         } else {
-            currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), Number(currentDate.getDate()) - 1)
-            generateCalendar(currentDate)
+            currentDate_daily = new Date(currentDate_daily.getFullYear(), currentDate_daily.getMonth(), Number(currentDate_daily.getDate()) - 1)
         }
+        generateCalendar(currentDate, currentDate_daily);
     });
 
-    $('#right').click(function(e) {
+    $('#right').click(function() {
         $('#div-list').text('');
         $('#day').text('');
         if ($( '.nav-link' ).attr( 'aria-selected' ) === 'true') {
             currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)
-            generateCalendar(currentDate);
         } else {
-            currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), Number(currentDate.getDate()) + 1)
-            generateCalendar(currentDate)
+            currentDate_daily = new Date(currentDate_daily.getFullYear(), currentDate_daily.getMonth(), Number(currentDate_daily.getDate()) + 1)
         }
+        generateCalendar(currentDate, currentDate_daily);
     });
     // modal에 하루종일 클릭시 시간설정 막음
     $('#inlineCheckbox2').click(function() {
@@ -660,7 +648,7 @@ $(document).ready(async function() {
         }
 
     });
-    generateCalendar(currentDate);
+    generateCalendar(currentDate, currentDate_daily);
 
     // Toggle between d-day view and end date view when clicking the newly added button.
     $(document).on('click', '#toggleSummary', function() {
@@ -670,7 +658,7 @@ $(document).ready(async function() {
         // Clear and re-generate the calendar (assuming currentDate is in scope)
         $('#div-list').html('');
         $('#day').html('');
-        generateCalendar(currentDate);
+        generateCalendar(currentDate, currentDate_daily);
     });
 
     // Toggle sorting between end_date and start_date
@@ -680,16 +668,7 @@ $(document).ready(async function() {
         // Re-generate the calendar (both month and day views) with the new sort order
         $('#div-list').html('');
         $('#day').html('');
-        generateCalendar(currentDate);
-    });
-
-    // Update currentView when toggling between views
-    $('#view li a').on('shown.bs.tab', function (e) {
-        if (e.target.id === 'daily-tab') {
-            currentView = 'daily';
-        } else if (e.target.id === 'month-tab') {
-            currentView = 'month';
-        }
+        generateCalendar(currentDate, currentDate_daily);
     });
 
     // New delegated event: Remove subtask row when '-' button is clicked
