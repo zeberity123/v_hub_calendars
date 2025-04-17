@@ -7,8 +7,6 @@ $(document).ready(async function() {
     var currentDate = new Date();
     var currentDate_daily = new Date();
 
-    var currentView = 'month';
-
     // DB에 있는 모든 데이터 저장
     var all_DB
     await axios.get('api/v1/calendar_list/')
@@ -16,12 +14,33 @@ $(document).ready(async function() {
             all_DB = res.data
         })
     
+    function pad(num) {
+        return num < 10 ? '0' + num : num;
+    }
+
+    var getTextLength = function(str) {
+        function _escape(text) {
+            var res = '', i;
+            for(i = 0; i < text.length; i ++) {
+              var c = text.charCodeAt(i);
+              if(c < 256) res += encodeURIComponent(text[i]);
+              else res += '%u' + c.toString(16).toUpperCase();
+            }
+            return res;
+        }
+        var len = 0;
+        for (var i = 0; i < str.length; i++) {
+            if (_escape(str.charAt(i)).length == 6) {
+                len++;
+            }
+            len++;
+        }
+        return len+1;
+    }
+    
     // calendar 만드는 함수
     async function generateCalendar(d, d_daily) {
         // Helper function for two-digit numbers
-        function pad(num) {
-          return num < 10 ? '0' + num : num;
-        }
         
         // 날짜 계산 함수
         Date.prototype.monthDays = function() {
@@ -34,7 +53,7 @@ $(document).ready(async function() {
             weekDays: ['일', '월', '화', '수', '목', '금', '토'],
             months: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
         };
-    
+
         var start = new Date(d.getFullYear(), d.getMonth()).getDay();
     
         // 이전 달과 다음 달의 날짜를 계산하기 위한 날짜들
@@ -157,7 +176,7 @@ $(document).ready(async function() {
             // ------------------------------------------------------------
             if (visibleKey in d_startdate) d_startdate[visibleKey].push(event_arr);
             else                           d_startdate[visibleKey] = [event_arr];
-            
+
         })
         // html에 띄우는 작업
         $('#div-list').append(cal);
@@ -358,8 +377,6 @@ $(document).ready(async function() {
         var maxTitleLength = 0;
         var maxSummaryLength = 0;
         var maxDdayLength = 0;
-        var maxEndDateLength = 0;
-        var maxStartDateLength = 0;
 
         all_DB.forEach(res => {
             const sParts = res.start_day.split('-');
@@ -378,15 +395,11 @@ $(document).ready(async function() {
                     var subtaskSummary = "(" + completedSubtasks + "/" + totalSubtasks + ")";
                     var remaining = Math.floor((eventEnd.getTime() - d_daily.getTime()) / (1000 * 60 * 60 * 24));
                     var d_day_str = 'D-' + (remaining > 0 ? remaining : '0');
-                    var end_date_str = '마감일: ' + (eventEnd.getMonth() + 1) + "월 " + eventEnd.getDate() + "일";
-                    var start_date_str = '시작일: ' + (eventStart.getMonth() + 1) + "월 " + eventStart.getDate() + "일";
 
                     // Update maximum lengths with proper character count
-                    maxTitleLength = Math.max(maxTitleLength, res.title.length * 2.5); // Korean characters are wider
+                    maxTitleLength = Math.max(maxTitleLength, getTextLength(res.title)); // Korean characters are wider
                     maxSummaryLength = Math.max(maxSummaryLength, subtaskSummary.length);
                     maxDdayLength = Math.max(maxDdayLength, d_day_str.length * 1.3);
-                    maxEndDateLength = Math.max(maxEndDateLength, end_date_str.length * 1.5);
-                    maxStartDateLength = Math.max(maxStartDateLength, start_date_str.length * 1.5);
                 }
             }
         });
@@ -409,9 +422,8 @@ $(document).ready(async function() {
                     var subtaskSummary = " (" + completedSubtasks + "/" + totalSubtasks + ") ";
                     var remaining = Math.floor((eventEnd.getTime() - d_daily.getTime()) / (1000 * 60 * 60 * 24));
                     var d_day_str = 'D-' + (remaining > 0 ? remaining : '0');
-                    var end_date_str = '마감일: ' + (eventEnd.getMonth() + 1) + "월 " + eventEnd.getDate() + "일";
-                    var start_date_str = '시작일: ' + (eventStart.getMonth() + 1) + "월 " + eventStart.getDate() + "일";
-
+                    var date_range_str = (pad(eventStart.getFullYear()-2000)) + '.' + (pad(eventStart.getMonth() + 1)) + "." + pad(eventStart.getDate()) + ' ~ ' +
+                                         (pad(eventEnd.getFullYear()-2000)) + '.' + (pad(eventEnd.getMonth() + 1)) + "." + pad(eventEnd.getDate());
                     
                     // Create grid layout with fixed-width columns
                     var titleWithSummary = `
@@ -419,8 +431,7 @@ $(document).ready(async function() {
                             <div class="grid-title" style="width: ${maxTitleLength}ch">${res.title}</div>
                             <div class="grid-summary" style="width: ${maxSummaryLength}ch">${subtaskSummary}</div>
                             <div class="grid-dday" style="width: ${maxDdayLength}ch">${d_day_str}</div>
-                            <div class="grid-start-date" style="width: ${maxStartDateLength}ch">${start_date_str}</div>
-                            <div class="grid-end-date" style="width: 16.5ch">${end_date_str}</div>                            
+                            <div class="grid-date-range" style="width: ${18}ch">${date_range_str}</div>                       
                             <div class="grid-tags">${res.tags || ''}</div>
                         </div>
                     `;
@@ -492,10 +503,10 @@ $(document).ready(async function() {
         $('#day').html(`<div class="daily-calendar">${content}</div>`);
     }
 
-    // -- NEW MODAL ENHANCEMENTS --
+    // -- modal form subtasks --
 
     // Remove any previous binding for the create button
-    $(document).off('click', '#create');
+    // $(document).off('click', '#create');
 
     var selectedColor = '#4285F4'; // default color
 

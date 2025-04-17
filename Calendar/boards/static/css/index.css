@@ -237,7 +237,7 @@ a:hover {
 /* Update styles for the event grid layout */
 .event-grid {
     display: grid;
-    grid-template-columns: auto auto auto 16.5ch 1fr auto;
+    grid-template-columns: auto auto auto auto auto;
     align-items: center;
     height: 100%;
     box-sizing: border-box;
@@ -246,9 +246,8 @@ a:hover {
 .grid-title,
 .grid-summary,
 .grid-dday,
-.grid-end-date,
 .grid-tags,
-.grid-start-date {
+.grid-date-range {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -273,11 +272,10 @@ a:hover {
     min-width: 5ch; /* Minimum width for d-day */
 }
 
-.grid-end-date,
-.grid-start-date {
+.grid-date-range {
     color: rgba(255, 255, 255);
     /* font-size: 0.9em; */
-    min-width: 8ch; /* Minimum width for dates */
+    min-width: 12ch; /* Minimum width for dates */
 }
 
 /* Ensure the event container can handle the grid layout */
