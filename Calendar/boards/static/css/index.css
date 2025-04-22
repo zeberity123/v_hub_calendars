@@ -218,6 +218,7 @@ a:hover {
 .modal .form-row .form-check-inline {
   align-items: baseline; }
 
+
 /* New styles for color selector circles with min dimensions */
 .color-circle {
     display: inline-block;
@@ -324,3 +325,16 @@ a:hover {
 .grid-tags {
     border-right: none !important;
 }
+#toggleMemo   { text-decoration:none; }
+#memoChevron  { font-weight:bold; }
+/* nicer arrow */
+#toggleMemo .material-icons {
+  font-size: 20px;          /* slightly smaller than default 24 px */
+  color:  #495057;          /* neutral grey */
+  transition: transform .2s ease;
+}
+/* arrow points down when memo is open */
+#toggleMemo.open .material-icons {
+  transform: rotate(90deg);
+}
+
