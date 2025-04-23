@@ -38,7 +38,11 @@ SECRET_KEY = get_secret("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    "13.125.216.89",
+    "127.0.0.1",
+    "localhost"
+]
 # ALLOWED_HOSTS = []
 
 
@@ -92,7 +96,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'calendardb.sqlite3',
+        'NAME': 'calendardb_rd.sqlite3',
     }
 }
 # Password validation
