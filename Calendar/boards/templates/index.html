@@ -94,13 +94,6 @@
                         <div id="subtasksContainer"></div>
                         <button type="button" class="btn btn-link" id="addSubtask">+</button>
                     </div>
-                    <!-- <div id="memoSection">
-                        <button id="toggleMemoButton" type="button">></button>
-                        <span> memo</span>
-                        <div id="memoContainer" style="display:none;">
-                        <textarea id="message-text" class="form-control" placeholder="Enter memo"></textarea>
-                        </div>
-                    </div> -->
                     <!-- Memo toggle -->
                     <div class="form-group" id="memoToggleGroup">
                         <!-- “> memo” toggle button -->
@@ -117,6 +110,10 @@
                                 rows="3"
                                 placeholder="메모"
                                 style="display:none;"></textarea>
+                        <!-- live preview with hyperlinks -->
+                        <div id="memoPreview"
+                            class="form-control mt-2"
+                            style="display:none; white-space:pre-wrap; cursor:text;"></div>
                     </div>
                     <div class="form-row">
                         <div class="col-md-6">

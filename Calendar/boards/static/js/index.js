@@ -305,7 +305,8 @@ $(document).ready(async function() {
                 $('#end-day').val(eventData.end_day);
                 $('#start-time').val(eventData.start_time);
                 $('#end-time').val(eventData.end_time);
-                $('#message-text').val(eventData.content);
+                // $('#message-text').val(eventData.content);
+                fillMemo(eventData.content);
                 // Set the color
                 selectedColor = eventData.color;
                 $('#colorSelector .color-circle').removeClass('selected');
@@ -369,6 +370,7 @@ $(document).ready(async function() {
         
             selectedColor = '';
             $('#colorSelector .color-circle').removeClass('selected');
+            resetMemoToggle();
             $('#registerSchedule')
                 .removeData('eventId')
                 .modal('show');
@@ -717,23 +719,34 @@ $(document).ready(async function() {
     ➊  Toggle the memo section
     ------------------------------------------------------------------ */
     $(document).on('click', '#toggleMemo', function () {
-        const $btn  = $(this);
-        const $memo = $('#message-text');
+        const $btn     = $(this);
+        const $memo    = $('#message-text');
+        const $preview = $('#memoPreview');
     
-        $memo.toggle();                   // show / hide textarea
-        $btn.toggleClass('open');         // rotate chevron
+        const isClosed = !$memo.is(':visible') && !$preview.is(':visible');
+    
+        if (isClosed) {
+            /* first click → show preview only */
+            switchToPreview();          // show preview, hide textarea
+            $btn.addClass('open');      // arrow rotates
+        } else {
+            /* second click → hide everything */
+            $memo.hide();
+            $preview.hide();
+            $btn.removeClass('open');   // arrow back
+        }
     });
   
     /* ------------------------------------------------------------------
     ➋  When the “new todo” modal opens, collapse the memo by default
     ------------------------------------------------------------------ */
-    function resetMemoToggle () {
-        $('#message-text').hide().val('');
-        $('#toggleMemo').removeClass('open');   // arrow back to »
-    }    
+    // function resetMemoToggle () {
+    //     $('#message-text').hide().val('');
+    //     $('#toggleMemo').removeClass('open');   // arrow back to »
+    // }    
 
     /* Hook the reset into the two places you already open the modal */
-    $(document).on('click', '.week', resetMemoToggle);                // new item
+    // $(document).on('click', '.week', resetMemoToggle);                // new item
     // $(document).on('click',
     //             '.event, .event-consecutive, .event-repeated',
     //             function () {
@@ -743,6 +756,55 @@ $(document).ready(async function() {
     //                 $('#message-text').toggle(hasMemo);
     //                 $('#memoChevron').text(hasMemo ? 'v' : '>');
     //             });
+
+    /* -----------------------------------------------------------
+   ➊  Convert plain URLs to <a href="…"> links
+   ----------------------------------------------------------- */
+    function linkify (text) {
+        const urlRE = /(https?:\/\/[^\s]+)/gi;
+        return text.replace(urlRE,
+            '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+    }
+
+    /* ---------- quick helpers ---------- */
+    function switchToEdit() {
+        $('#memoPreview').hide();
+        $('#message-text').show().focus();
+    }
+    function switchToPreview() {
+        const raw = $('#message-text').val();
+        $('#memoPreview').html(linkify(raw)).show();
+        $('#message-text').hide();
+    }
+
+    /* ---------- click & blur logic ---------- */
+    $(document).on('click', '#memoPreview', switchToEdit);      // enter edit
+    $(document).on('blur' , '#message-text', switchToPreview);  // leave edit
+
+    /* keep preview live while typing */
+    $(document).on('input', '#message-text', function () {
+        $('#memoPreview').html(linkify(this.value));
+    });
+
+    /* ---------- opening / resetting the memo ---------- */
+    function resetMemoToggle () {
+        $('#message-text').val('').hide();
+        $('#memoPreview').hide();       // keep whatever html was there, just hide
+        $('#toggleMemo').removeClass('open');
+    }
+    
+    /* new todo (click empty cell) */
+    $(document).on('click', '.week', function () {
+        resetMemoToggle();              // <-- add this line
+        $('#registerSchedule').modal('show');
+    });
+    
+    /* existing todo */
+    function fillMemo(content) {
+        $('#message-text').val(content);         // keep the value
+        $('#memoPreview').html(linkify(content))
+                        .hide();                 // but stay hidden
+    }
 
 });
 
