@@ -19,5 +19,3 @@ dats = {"id":2,
         "color":"#E91E63",
         "subtasks":[{"id":101,"text":"ㄹ","completed":true},{"id":102,"text":"ㅋ","completed":false},{"id":103,"text":"ㄹㅋ","completed":false}]}
 
-
-data1 = 
