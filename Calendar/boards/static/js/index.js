@@ -708,6 +708,42 @@ $(document).ready(async function() {
     $('#registerSchedule').on('show.bs.modal', function() {
         $(this).removeAttr('inert');
     });
+
+    // $(document).on('click', '#toggleMemoButton', function() {
+    //     $('#memoContainer').toggle();
+    //     $(this).text($('#memoContainer').is(':visible') ? 'v' : '>');
+    // });
+    /* ------------------------------------------------------------------
+    ➊  Toggle the memo section
+    ------------------------------------------------------------------ */
+    $(document).on('click', '#toggleMemo', function () {
+        const $btn  = $(this);
+        const $memo = $('#message-text');
+    
+        $memo.toggle();                   // show / hide textarea
+        $btn.toggleClass('open');         // rotate chevron
+    });
+  
+    /* ------------------------------------------------------------------
+    ➋  When the “new todo” modal opens, collapse the memo by default
+    ------------------------------------------------------------------ */
+    function resetMemoToggle () {
+        $('#message-text').hide().val('');
+        $('#toggleMemo').removeClass('open');   // arrow back to »
+    }    
+
+    /* Hook the reset into the two places you already open the modal */
+    $(document).on('click', '.week', resetMemoToggle);                // new item
+    // $(document).on('click',
+    //             '.event, .event-consecutive, .event-repeated',
+    //             function () {
+    //                 /* if there is existing content, auto‑expand */
+    //                 // const hasMemo = !!$('#message-text').val();
+    //                 const hasMemo = false
+    //                 $('#message-text').toggle(hasMemo);
+    //                 $('#memoChevron').text(hasMemo ? 'v' : '>');
+    //             });
+
 });
 
 String.prototype.replaceAll = function(org, dest) {

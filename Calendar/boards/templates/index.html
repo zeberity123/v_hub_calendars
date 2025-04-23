@@ -88,11 +88,35 @@
                         <label class="col-form-label">일정 제목</label>
                         <input type="text" name="title" class="form-control" id="recipient-name">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="margin-bottom: 0px;">
                         <label class="col-form-label">할 일 목록</label>
                         <div class="subtasks-progress">완료: <span id="completedCount">0</span>/<span id="totalCount">0</span></div>
                         <div id="subtasksContainer"></div>
                         <button type="button" class="btn btn-link" id="addSubtask">+</button>
+                    </div>
+                    <!-- <div id="memoSection">
+                        <button id="toggleMemoButton" type="button">></button>
+                        <span> memo</span>
+                        <div id="memoContainer" style="display:none;">
+                        <textarea id="message-text" class="form-control" placeholder="Enter memo"></textarea>
+                        </div>
+                    </div> -->
+                    <!-- Memo toggle -->
+                    <div class="form-group" id="memoToggleGroup">
+                        <!-- “> memo” toggle button -->
+                        <button type="button"
+                                class="btn btn-link p-0 d-flex align-items-center"
+                                id="toggleMemo">
+                            <i id="memoChevron" class="material-icons">chevron_right</i>
+                            <span class="ml-1">메모</span>
+                        </button>
+
+                        <!-- real textarea, hidden until the user expands it -->
+                        <textarea  id="message-text"
+                                class="form-control mt-2"
+                                rows="3"
+                                placeholder="메모"
+                                style="display:none;"></textarea>
                     </div>
                     <div class="form-row">
                         <div class="col-md-6">
