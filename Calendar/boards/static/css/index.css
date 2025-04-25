@@ -353,3 +353,12 @@ a:hover {
   text-overflow: ellipsis;
 }
 
+/* let the preview box expand naturally */
+#memoPreview {
+  white-space: pre-wrap;
+  cursor: text;
+  min-height: 38px;     /* same visual height as .form-control */
+  height: auto !important;
+  overflow: hidden;     /* no internal scrollbars */
+}
+

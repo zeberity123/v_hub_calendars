@@ -514,6 +514,8 @@ $(document).ready(async function() {
         });
 
         $('#day').html(`<div class="daily-calendar">${content}</div>`);
+        $('#months').text(d_daily.getMonth() + 1);   // 1 – 12
+        $('#year').text(d_daily.getFullYear());
     }
 
     // -- modal form subtasks --
@@ -768,12 +770,26 @@ $(document).ready(async function() {
 
     /* ---------- quick helpers ---------- */
     function switchToEdit() {
-        $('#memoPreview').hide();
-        $('#message-text').show().focus();
+        const $memo    = $('#message-text');
+        const $preview = $('#memoPreview');
+    
+        $preview.hide();
+        $memo.show().focus();
+    
+        /* --- match the height of current content --- */
+        $memo[0].style.height = 'auto';                   // reset
+        $memo[0].style.height = $memo[0].scrollHeight + 'px';
     }
     function switchToPreview() {
         const raw = $('#message-text').val();
-        $('#memoPreview').html(linkify(raw)).show();
+        const $preview = $('#memoPreview');
+    
+        $preview.html(linkify(raw));
+        /* -------- auto-size to fit content -------- */
+        $preview[0].style.height = 'auto';              // reset
+        $preview[0].style.height = $preview[0].scrollHeight + 'px';
+    
+        $preview.show();
         $('#message-text').hide();
     }
 
@@ -783,7 +799,15 @@ $(document).ready(async function() {
 
     /* keep preview live while typing */
     $(document).on('input', '#message-text', function () {
-        $('#memoPreview').html(linkify(this.value));
+    /* auto-grow textarea */
+    this.style.height = 'auto';
+    this.style.height = this.scrollHeight + 'px';
+
+    /* keep preview in sync (for when user blurs) */
+    const $preview = $('#memoPreview');
+    $preview.html(linkify(this.value));
+    $preview[0].style.height = 'auto';
+    $preview[0].style.height = $preview[0].scrollHeight + 'px';
     });
 
     /* ---------- opening / resetting the memo ---------- */
