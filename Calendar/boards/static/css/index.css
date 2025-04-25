@@ -9,7 +9,7 @@ body {
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
-  background: white url("../bg_images/bg_miku3.jpg") no-repeat;
+  background: white url("../bg_images/bg_miku3.jpg") repeat-y;
   background-size: cover;
   font-family: "roboto", 'NotoSansKR', "Helvetica Neue", Helvetica, Arial, "맑은 고딕", malgun gothic, "돋움", Dotum, sans-serif, "Apple Color Emoji", "Noto Color Emoji";
   color: #263747; }
