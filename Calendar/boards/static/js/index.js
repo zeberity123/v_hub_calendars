@@ -365,6 +365,7 @@ $(document).ready(async function() {
             $('#recipient-name, #end-day, #start-time, #end-time, #message-text, #todoTags')
                 .val('');
             $('#start-day').val(cutdate);
+            $('#end-day').val(cutdate);
             $('#subtasksContainer').empty();
             updateSubtaskProgress();
         
@@ -759,28 +760,75 @@ $(document).ready(async function() {
         const $memo    = $('#message-text');
         const $preview = $('#memoPreview');
     
+        /* ① remember how tall the preview is right now */
+        const previewHeight = $preview.outerHeight();
+
+        /* ② swap widgets */
         $preview.hide();
         $memo.show().focus();
-    
-        /* --- match the height of current content --- */
-        $memo[0].style.height = 'auto';                   // reset
-        $memo[0].style.height = $memo[0].scrollHeight + 'px';
+
+        /* ③ give the textarea exactly the same height */
+        $memo[0].style.height = previewHeight + 'px';
     }
     function switchToPreview() {
-        const raw = $('#message-text').val();
+        const $memo    = $('#message-text');
         const $preview = $('#memoPreview');
     
-        $preview.html(linkify(raw));
-        /* -------- auto-size to fit content -------- */
-        $preview[0].style.height = 'auto';              // reset
-        $preview[0].style.height = $preview[0].scrollHeight + 'px';
+        /* render hyperlinks */
+        $preview.html( linkify( $memo.val() ) );
+    
+        /* ④ let the preview grow to fit the content of the textarea */
+        $preview[0].style.height = 'auto';                 // reset first
+        $preview[0].style.height = $memo[0].scrollHeight + 'px';
     
         $preview.show();
-        $('#message-text').hide();
+        $memo.hide();
+    }
+    function getOffsetFromPoint(el, x, y) {
+        let range;
+    
+        if (document.caretRangeFromPoint) {                       // Chrome / Edge
+            range = document.caretRangeFromPoint(x, y);
+        } else if (document.caretPositionFromPoint) {             // Firefox
+            const pos = document.caretPositionFromPoint(x, y);
+            range = document.createRange();
+            range.setStart(pos.offsetNode, pos.offset);
+            range.setEnd  (pos.offsetNode, pos.offset);
+        } else {
+            /* very old browsers – fall back to “end of text” */
+            return $('#message-text').val().length;
+        }
+    
+        /* length of text from element start → clicked point */
+        const pre = range.cloneRange();
+        pre.selectNodeContents(el);
+        pre.setEnd(range.endContainer, range.endOffset);
+        return pre.toString().length;
     }
 
     /* ---------- click & blur logic ---------- */
-    $(document).on('click', '#memoPreview', switchToEdit);      // enter edit
+    /* ---------- click-to-edit WITH exact caret placement ---------- */
+    $(document).off('click', '#memoPreview');          // remove old handler
+    $(document).on( 'click', '#memoPreview', function (e) {
+
+        /* ----------------------------------------------------------
+        ① find the character-offset in the preview that was clicked
+        ---------------------------------------------------------- */
+        const idx = getOffsetFromPoint(this, e.clientX, e.clientY);
+
+        /* ----------------------------------------------------------
+        ② open the textarea …
+        ---------------------------------------------------------- */
+        switchToEdit();
+
+        /* … and ③ drop the caret at that character position         */
+        const $memo = $('#message-text');
+        /* `setSelectionRange` must run *after* the textarea is shown,
+        so we defer it with a micro-task                            */
+        Promise.resolve().then(() => {
+            $memo[0].setSelectionRange(idx, idx);
+        });
+    });
     $(document).on('blur' , '#message-text', switchToPreview);  // leave edit
 
     /* keep preview live while typing */
@@ -811,6 +859,7 @@ $(document).ready(async function() {
     
     /* existing todo */
     function fillMemo(content) {
+        $('#toggleMemo').removeClass('open');
         $('#message-text').val(content);         // keep the value
         $('#memoPreview').html(linkify(content))
                         .hide();                 // but stay hidden
