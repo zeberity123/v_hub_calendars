@@ -319,14 +319,18 @@ $(document).ready(async function() {
                 // Load and render subtasks if available
                 if (eventData.subtasks && eventData.subtasks.length > 0) {
                     eventData.subtasks.forEach(function(subtask) {
-                        var newRow = $("<div class='subtask-item d-flex align-items-center mb-2'>" +
-                                       "<input type='checkbox' class='subtask-check mr-2'>" +
-                                       "<input type='text' class='subtask-text form-control' placeholder='세부 할 일'>" +
-                                       "<button type='button' class='btn btn-danger btn-sm remove-subtask ml-2'>-</button>" +
-                                       "</div>");
+                        var newRow = $(`
+                            <div class="subtask-item d-flex align-items-center mb-2">
+                                <input type="checkbox" class="subtask-check mr-2">
+                                <input type="text"     class="subtask-text form-control"
+                                       placeholder="세부 할 일">
+                                <button type="button"
+                                        class="btn btn-danger btn-sm remove-subtask ml-2">-</button>
+                            </div>`);
                         newRow.find('.subtask-check').prop('checked', subtask.completed);
                         newRow.find('.subtask-text').val(subtask.text);
                         $('#subtasksContainer').append(newRow);
+                        enterPreview(newRow);
                     });
                 }
                 updateSubtaskProgress();
@@ -526,12 +530,16 @@ $(document).ready(async function() {
 
     // Delegated event: Add new subtask row when '+' is clicked
     $(document).on('click', '#addSubtask', function() {
-        var newRow = $('<div class="subtask-item d-flex align-items-center mb-2">' +
-                       '<input type="checkbox" class="subtask-check mr-2">' +
-                       '<input type="text" class="subtask-text form-control" placeholder="세부 할 일">' +
-                       '<button type="button" class="btn btn-danger btn-sm remove-subtask ml-2">-</button>' +
-                       '</div>');
+        var newRow = $(`
+            <div class="subtask-item d-flex align-items-center mb-2">
+                <input type="checkbox" class="subtask-check mr-2">
+                <input type="text"     class="subtask-text form-control"
+                       placeholder="세부 할 일">
+                <button type="button"
+                        class="btn btn-danger btn-sm remove-subtask ml-2">-</button>
+            </div>`);
         $('#subtasksContainer').append(newRow);
+        enterPreview(newRow);
         updateSubtaskProgress();
     });
 
@@ -547,6 +555,52 @@ $(document).ready(async function() {
         $('#completedCount').text(completed);
         $('#totalCount').text(total);
     }
+
+    /* -----------------------------------------------
+    Preview ↔︎ Edit helpers for a single row
+    ------------------------------------------------ */
+    function enterPreview($row) {
+        const $input   = $row.find('.subtask-text');
+        let   $preview = $row.find('.subtask-preview');
+    
+        /* create preview once */
+        if (!$preview.length) {
+        $preview = $('<div class="subtask-preview"></div>');
+        $input.after($preview);
+        }
+    
+        $preview.text($input.val() || '');   // sync text
+        $input.hide();
+        $preview.show();
+    
+        /* re-enable D-n-D */
+        if (subtasksSortable) subtasksSortable.option('disabled', false);
+    }
+    
+    function enterEdit($row) {
+        const $input   = $row.find('.subtask-text');
+        const $preview = $row.find('.subtask-preview');
+    
+        $preview.hide();
+        $input.show().focus();
+    
+        /* disable D-n-D while typing */
+        if (subtasksSortable) subtasksSortable.option('disabled', true);
+    }
+    /* click on the preview → edit */
+    $(document).on('click', '.subtask-preview', function () {
+        enterEdit( $(this).closest('.subtask-item') );
+    });
+    
+    /* leave the input → back to preview */
+    $(document).on('blur',  '.subtask-text', function () {
+        enterPreview( $(this).closest('.subtask-item') );
+    });
+    
+    /* keep preview text live while typing */
+    $(document).on('input', '.subtask-text', function () {
+        $(this).siblings('.subtask-preview').text(this.value);
+    });
 
     // Update progress when a subtask checkbox changes state
     $(document).on('change', '.subtask-check', function() {
@@ -869,6 +923,29 @@ $(document).ready(async function() {
                         .hide();                 // but stay hidden
     }
 
+
+    /* -----------------------------------------------
+    1.  keep a single Sortable instance per modal
+    ------------------------------------------------ */
+    let subtasksSortable = null;
+
+    $('#registerSchedule').on('shown.bs.modal', function () {
+        /* destroy previous instance (e.g. between edits) */
+        if (subtasksSortable) subtasksSortable.destroy();
+
+        subtasksSortable = new Sortable(
+            document.getElementById('subtasksContainer'),
+            {
+                animation: 150,           // nice slide animation (ms)
+                ghostClass: 'subtask-ghost',
+                chosenClass: 'subtask-chosen',
+                forceFallback: true       // works inside <input>
+            }
+        );
+    });
+    $('#subtasksContainer .subtask-item').each(function () {
+        enterPreview( $(this) );
+      });
 });
 
 String.prototype.replaceAll = function(org, dest) {
