@@ -811,6 +811,7 @@ $(document).ready(async function() {
     
     /* existing todo */
     function fillMemo(content) {
+        $('#toggleMemo').removeClass('open');
         $('#message-text').val(content);         // keep the value
         $('#memoPreview').html(linkify(content))
                         .hide();                 // but stay hidden
