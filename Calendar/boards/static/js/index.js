@@ -365,6 +365,7 @@ $(document).ready(async function() {
             $('#recipient-name, #end-day, #start-time, #end-time, #message-text, #todoTags')
                 .val('');
             $('#start-day').val(cutdate);
+            $('#end-day').val(cutdate);
             $('#subtasksContainer').empty();
             updateSubtaskProgress();
         
