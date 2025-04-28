@@ -369,3 +369,32 @@ a:hover {
   /* height:auto !important;    */
   resize:none;              /* you can allow vertical if you prefer  */
 }
+
+/* cursor everywhere on the row, including the <input> */
+.subtask-item          { cursor: move; }
+
+/* row that is currently “picked up” */
+.subtask-chosen        { opacity: .8; }
+
+/* semi-transparent copy that follows the mouse */
+.subtask-ghost         { opacity: .3; }
+
+/* The read-only look */
+.subtask-preview {
+  flex: 1 1 auto;                /* fill the row */
+  padding: .375rem .75rem;       /* same as .form-control */
+  border: 1px solid #ced4da;
+  border-radius: .25rem;
+  background:#fff;
+  cursor: move;                  /* visual cue for D-n-D */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select:none;          /* modern browsers */
+  -webkit-user-select:none;  /* Safari / older Chrome */
+  -moz-user-select:none;     /* Firefox */
+  -ms-user-select:none;      /* old IE / Edge */
+}
+
+/* When we’re editing, keep the row height stable */
+.subtask-text { flex: 1 1 auto; }
