@@ -514,15 +514,13 @@ $(document).ready(async function() {
         });
 
         $('#day').html(`<div class="daily-calendar">${content}</div>`);
-        $('#months').text(d_daily.getMonth() + 1);   // 1 – 12
-        $('#year').text(d_daily.getFullYear());
+        if ($('#tab-day').attr('aria-selected') === 'true'){
+            $('#months').text(d_daily.getMonth() + 1);   // 1 – 12
+            $('#year').text(d_daily.getFullYear());
+        }
     }
 
     // -- modal form subtasks --
-
-    // Remove any previous binding for the create button
-    // $(document).off('click', '#create');
-
     var selectedColor = '#4285F4'; // default color
 
     // Delegated event: Add new subtask row when '+' is clicked
@@ -633,36 +631,48 @@ $(document).ready(async function() {
     $('#todaymove').click(function() {
         $('#div-list').text('');
         $('#day').text('');
-        if ($( '.nav-link' ).attr( 'aria-selected' ) === 'true'){
+        if ($('#tab-month').attr( 'aria-selected' ) === 'true'){
             currentDate = new Date();
         } else {
             currentDate_daily = new Date();
         }
         generateCalendar(currentDate, currentDate_daily);
     });
-
     // 달, 일에 따라 날짜 이동
     $('#left').click(function() {
-        $('#div-list').text('');
-        $('#day').text('');
-        if ($( '.nav-link' ).attr( 'aria-selected' ) === 'true') {
-            currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
+        $('#div-list').empty();
+        $('#day').empty();
+        if ($('#tab-month').attr( 'aria-selected' ) === 'true') {
+            currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
         } else {
-            currentDate_daily = new Date(currentDate_daily.getFullYear(), currentDate_daily.getMonth(), Number(currentDate_daily.getDate()) - 1)
+            currentDate_daily.setDate(currentDate_daily.getDate() - 1);
         }
+        // console.log(`currentDate: ${currentDate}`);
         generateCalendar(currentDate, currentDate_daily);
+    });
+    $('#right').click(function() {
+        $('#div-list').empty();
+        $('#day').empty();
+        if ($('#tab-month').attr( 'aria-selected' ) === 'true') {
+            currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
+        } else {
+            currentDate_daily.setDate(currentDate_daily.getDate() + 1);
+        }
+        // console.log(`currentDate: ${currentDate}`);
+        generateCalendar(currentDate, currentDate_daily);
+    });
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+
+        if (e.target.id === 'tab-day') {            // Day tab just became active
+            $('#months').text(currentDate_daily.getMonth() + 1);
+            $('#year'  ).text(currentDate_daily.getFullYear());
+    
+        } else if (e.target.id === 'tab-month') {   // back to Month tab
+            $('#months').text(currentDate.getMonth() + 1);
+            $('#year'  ).text(currentDate.getFullYear());
+        }
     });
 
-    $('#right').click(function() {
-        $('#div-list').text('');
-        $('#day').text('');
-        if ($( '.nav-link' ).attr( 'aria-selected' ) === 'true') {
-            currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)
-        } else {
-            currentDate_daily = new Date(currentDate_daily.getFullYear(), currentDate_daily.getMonth(), Number(currentDate_daily.getDate()) + 1)
-        }
-        generateCalendar(currentDate, currentDate_daily);
-    });
     // modal에 하루종일 클릭시 시간설정 막음
     $('#inlineCheckbox2').click(function() {
         if ($('#inlineCheckbox2').is(":checked")) {
@@ -713,10 +723,6 @@ $(document).ready(async function() {
         $(this).removeAttr('inert');
     });
 
-    // $(document).on('click', '#toggleMemoButton', function() {
-    //     $('#memoContainer').toggle();
-    //     $(this).text($('#memoContainer').is(':visible') ? 'v' : '>');
-    // });
     /* ------------------------------------------------------------------
     ➊  Toggle the memo section
     ------------------------------------------------------------------ */
@@ -738,26 +744,6 @@ $(document).ready(async function() {
             $btn.removeClass('open');   // arrow back
         }
     });
-  
-    /* ------------------------------------------------------------------
-    ➋  When the “new todo” modal opens, collapse the memo by default
-    ------------------------------------------------------------------ */
-    // function resetMemoToggle () {
-    //     $('#message-text').hide().val('');
-    //     $('#toggleMemo').removeClass('open');   // arrow back to »
-    // }    
-
-    /* Hook the reset into the two places you already open the modal */
-    // $(document).on('click', '.week', resetMemoToggle);                // new item
-    // $(document).on('click',
-    //             '.event, .event-consecutive, .event-repeated',
-    //             function () {
-    //                 /* if there is existing content, auto‑expand */
-    //                 // const hasMemo = !!$('#message-text').val();
-    //                 const hasMemo = false
-    //                 $('#message-text').toggle(hasMemo);
-    //                 $('#memoChevron').text(hasMemo ? 'v' : '>');
-    //             });
 
     /* -----------------------------------------------------------
    ➊  Convert plain URLs to <a href="…"> links
@@ -819,7 +805,7 @@ $(document).ready(async function() {
     
     /* new todo (click empty cell) */
     $(document).on('click', '.week', function () {
-        resetMemoToggle();              // <-- add this line
+        resetMemoToggle();
         $('#registerSchedule').modal('show');
     });
     

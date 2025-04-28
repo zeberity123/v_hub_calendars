@@ -362,3 +362,10 @@ a:hover {
   overflow: hidden;     /* no internal scrollbars */
 }
 
+/* same visual rules as #memoPreview */
+#message-text {
+  overflow:hidden;          /* no internal scrollbar while editing   */
+  min-height:38px;          /* same default height as .form-control  */
+  height:auto !important;   /* let JS drive the height               */
+  resize:none;              /* you can allow vertical if you prefer  */
+}
