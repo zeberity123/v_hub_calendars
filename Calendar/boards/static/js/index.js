@@ -318,19 +318,14 @@ $(document).ready(async function() {
                 $('#todoTags').val(eventData.tags || '');
                 // Load and render subtasks if available
                 if (eventData.subtasks && eventData.subtasks.length > 0) {
-                    eventData.subtasks.forEach(function(subtask) {
-                        var newRow = $(`
-                            <div class="subtask-item d-flex align-items-center mb-2">
-                                <input type="checkbox" class="subtask-check mr-2">
-                                <input type="text"     class="subtask-text form-control"
-                                       placeholder="세부 할 일">
-                                <button type="button"
-                                        class="btn btn-danger btn-sm remove-subtask ml-2">-</button>
-                            </div>`);
-                        newRow.find('.subtask-check').prop('checked', subtask.completed);
-                        newRow.find('.subtask-text').val(subtask.text);
-                        $('#subtasksContainer').append(newRow);
-                        enterPreview(newRow);
+                    eventData.subtasks.forEach(function (st) {
+                        /* use the same builder that new rows use  */
+                        const $row = makeSubTaskRow(st.text, st.completed);
+                    
+                        /* if you keep the older HTML builder, just call
+                           addHitBox( $row ) afterwards              */
+                    
+                        $('#subtasksContainer').append($row);
                     });
                 }
                 updateSubtaskProgress();
@@ -528,18 +523,36 @@ $(document).ready(async function() {
     // -- modal form subtasks --
     var selectedColor = '#4285F4'; // default color
 
-    // Delegated event: Add new subtask row when '+' is clicked
-    $(document).on('click', '#addSubtask', function() {
-        var newRow = $(`
-            <div class="subtask-item d-flex align-items-center mb-2">
-                <input type="checkbox" class="subtask-check mr-2">
-                <input type="text"     class="subtask-text form-control"
-                       placeholder="세부 할 일">
-                <button type="button"
-                        class="btn btn-danger btn-sm remove-subtask ml-2">-</button>
-            </div>`);
-        $('#subtasksContainer').append(newRow);
-        enterPreview(newRow);
+    /*  replace *only* the HTML string that builds a sub-task row  */
+    function makeSubTaskRow (text = '', completed = false) {
+        /* a unique id so <label for="…"> works */
+        const uid = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+
+        return $(`<div class="subtask-item d-flex align-items-center mb-2">
+                    <!-- ➊ the real checkbox -->
+                    <input  id="${uid}"
+                            type="checkbox"
+                            class="subtask-check mr-2"
+                            ${completed ? 'checked' : ''}>
+
+                    <!-- ➋ the invisible hit-box  -->
+                    <label  for="${uid}"
+                            class="subtask-hitbox"></label>
+
+                    <!-- ➌ the text field -->
+                    <input  type="text"
+                            class="subtask-text form-control"
+                            placeholder="세부 할 일"
+                            value="${text}">
+                    
+                    <button type="button"
+                            class="btn btn-danger btn-sm remove-subtask ml-2">-</button>
+                </div>`);
+    }
+
+    /* whenever you add a row … */
+    $('#addSubtask').on('click', function () {
+        $('#subtasksContainer').append( makeSubTaskRow() );
         updateSubtaskProgress();
     });
 
@@ -1007,4 +1020,26 @@ function escapeAttr(str) {
 
 function safeDataEvent(obj) {
     return escapeAttr(JSON.stringify(obj));
+}
+
+/* --------------------------------------------------
+   make sure every .subtask-check has a hit-box label
+-------------------------------------------------- */
+function addHitBox ($subtaskItem) {
+    const $cb = $subtaskItem.find('.subtask-check');
+
+    /* already upgraded? → nothing to do */
+    if ($subtaskItem.find('.subtask-hitbox').length) return;
+
+    /* guarantee the checkbox has an id */
+    let id = $cb.attr('id');
+    if (!id) {
+        id = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+        $cb.attr('id', id);
+    }
+
+    /* inject the label right after the checkbox           */
+    /* (position:absolute in CSS keeps layout untouched)    */
+    $('<label class="subtask-hitbox" for="' + id + '"></label>')
+        .insertAfter($cb);
 }

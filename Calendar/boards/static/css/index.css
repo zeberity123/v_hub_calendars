@@ -370,9 +370,6 @@ a:hover {
   resize:none;              /* you can allow vertical if you prefer  */
 }
 
-/* cursor everywhere on the row, including the <input> */
-.subtask-item          { cursor: move; }
-
 /* row that is currently “picked up” */
 .subtask-chosen        { opacity: .8; }
 
@@ -402,3 +399,19 @@ a:hover {
 
 /* When we’re editing, keep the row height stable */
 .subtask-text { flex: 1 1 auto; }
+
+/* the subtask line */
+.subtask-item { position: relative; }
+
+/* the “invisible” label that sits on top of the checkbox */
+.subtask-hitbox{
+  position:absolute;
+  left: 0;                    /* same x-pos as the checkbox      */
+  top:  0px;                /* 12 px extra above               */
+  height: calc(100%);  /* 12 px above  +  the checkbox  + 12 px below */
+  width:  20px;               /* just as wide as the checkbox    */
+  cursor:pointer;             /* lets the user know it’s clickable */
+  
+  /* optional, uncomment to see the area during development */
+  /* background:rgba(255,0,0,.15); */
+}
