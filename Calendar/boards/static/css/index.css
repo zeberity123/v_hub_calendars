@@ -396,5 +396,9 @@ a:hover {
   -ms-user-select:none;      /* old IE / Edge */
 }
 
+.subtask-preview:empty::before {
+  content: "\00a0";  /* U+00A0 = nbsp → just whitespace, invisible */
+}
+
 /* When we’re editing, keep the row height stable */
 .subtask-text { flex: 1 1 auto; }
