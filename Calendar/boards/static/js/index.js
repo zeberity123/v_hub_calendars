@@ -4,6 +4,7 @@ $(document).ready(async function() {
     var toggle_d_day_status = true;
     var toggle_sort_mode = true;
     // 현재날짜 저장
+    let pinnedStatus = false;
     var currentDate = new Date();
     var currentDate_daily = new Date();
 
@@ -167,9 +168,10 @@ $(document).ready(async function() {
                 endTS,                   // 13
                 totalSubtasks ? doneSubtasks/totalSubtasks : 1, // 14
                 res.title,               // 15
-                res.tags                 // 16
+                res.tags,                // 16
+                !!res.pinned             // 17
             ];
-            event_arr.push(res.subtasks || []); // 17
+            event_arr.push(res.subtasks || []);     // 18
 
             // ------------------------------------------------------------
             // 3️⃣  Store under the *visible* key
@@ -203,18 +205,23 @@ $(document).ready(async function() {
         var day_cal = ['7', '6', '5', '4', '3', '2', '1']
         for (var key in d_startdate) {
             d_startdate[key].sort(function(a, b) {
+                if (a[17] !== b[17]) return  b[17] - a[17];   //  pinned=true first
                 if (toggle_sort_mode) {  // sort by start_date
                     if (a[12] !== b[12]) return b[12] - a[12];
                     else if (a[13] !== b[13]) return b[13] - a[13];
                     else if (a[14] !== b[14]) return b[14] - a[14];
                     else {
-                        return a[15].localeCompare(b[15]);
+                        console.log(b[15], a[15])
+                        return b[15].localeCompare(a[15]);
                     }
                 } else {  // sort by end_date
                     if (a[13] !== b[13]) return b[13] - a[13];
                     else if (a[12] !== b[12]) return b[12] - a[12];
                     else if (a[14] !== b[14]) return [14] - a[14];
-                    else return a[15].localeCompare(b[15]);
+                    else {
+                        console.log(b[15], a[15])
+                        return b[15].localeCompare(a[15]);
+                    }
                 }
             });
         }
@@ -231,8 +238,9 @@ $(document).ready(async function() {
                         end_time: res[7],
                         content: res[8],
                         color: res[11],
-                        subtasks: res[17],
-                        tags: res[16]
+                        subtasks: res[18],
+                        tags: res[16],
+                        pinned: res[17]
                     }
                     
                     if (Number(res[0]) > Number(day_cal[res[2]])) {
@@ -268,7 +276,7 @@ $(document).ready(async function() {
     
                         }
 
-                        var s_new_date_data = [Number(res[0]) - Number(day_cal[res[2]]), res[1], 0, true, res[4], res[5], res[6], res[7], res[8], res[9], res[10], res[11], res[12], res[13], res[14], res[15], res[16], res[17]]
+                        var s_new_date_data = [Number(res[0]) - Number(day_cal[res[2]]), res[1], 0, true, res[4], res[5], res[6], res[7], res[8], res[9], res[10], res[11], res[12], res[13], res[14], res[15], res[16], res[18], res[17]]
                         if (s_new_date in d_startdate) {
                             d_startdate[s_new_date].push(s_new_date_data)
                         } else {
@@ -307,6 +315,9 @@ $(document).ready(async function() {
                     console.error('Failed to parse event data:', err);
                 }
             }
+            pinnedStatus = !!eventData.pinned;
+            $('#pinToggle').toggleClass('active', pinnedStatus)
+                           .attr('aria-pressed', pinnedStatus);
             // Clear existing subtasks
             $('#subtasksContainer').empty();
             if (eventData) {
@@ -352,7 +363,6 @@ $(document).ready(async function() {
         // 달력클릭시 일정작성 폼이 나옴
         $(document).on('click', '.week', function (e) {
             console.log(e)
-       
             /* ---------------------------------------------------------
                Which column inside this .week was clicked?
                --------------------------------------------------------- */
@@ -388,6 +398,7 @@ $(document).ready(async function() {
             $('#registerSchedule')
                 .removeData('eventId')
                 .modal('show');
+            $('#pinToggle').removeClass('active').attr('aria-pressed', false);
         });
         generateDaily(d_daily)
     }
@@ -485,6 +496,7 @@ $(document).ready(async function() {
                     }
 
                     uniqueEvents[res.id] = {
+                        pinned : !!res.pinned,
                         sortStart: startTS,
                         sortEnd: endTS,
                         ratio: subtaskRatio,
@@ -497,11 +509,15 @@ $(document).ready(async function() {
 
         var eventsList = Object.values(uniqueEvents);
         eventsList.sort(function(a, b) {
+            // disabled pinned first temporarily
+            if (a.pinned !== b.pinned) return  b.pinned - a.pinned;
             if (toggle_sort_mode) {
                 if (a.sortEnd !== b.sortEnd) return a.sortEnd - b.sortEnd;
                 else if (a.sortStart !== b.sortStart) return a.sortStart - b.sortStart;
                 else if (a.ratio !== b.ratio) return a.ratio - b.ratio;
-                else return a.origTitle.localeCompare(b.origTitle);
+                else {
+                    return a.origTitle.localeCompare(b.origTitle);
+                }
             } else {
                 if (a.sortStart !== b.sortStart) return a.sortStart - b.sortStart;
                 else if (a.sortEnd !== b.sortEnd) return a.sortEnd - b.sortEnd;
@@ -632,6 +648,13 @@ $(document).ready(async function() {
         $(this).addClass('selected');
     });
 
+    /* pin button click */
+    $(document).on('click', '#pinToggle', function () {
+        pinnedStatus = !pinnedStatus;
+        $(this).toggleClass('active')
+            .attr('aria-pressed', pinnedStatus);
+    });
+
     // Delegated event: Save (create/update) button
     $(document).on('click', '#create', async function() {
         const data = new FormData();
@@ -652,6 +675,7 @@ $(document).ready(async function() {
         data.append('subtasks', JSON.stringify(subtasks));
         // Append the tags from the tag input field
         data.append('tags', $('#todoTags').val());
+        data.append('pinned', pinnedStatus ? 'True' : 'False');
         
         const eventId = $('#registerSchedule').data('eventId');
         if (eventId) {
@@ -966,7 +990,7 @@ $(document).ready(async function() {
         /* keep the live-preview in sync */
         $(this).trigger('input');
     });
-
+    
     /* ---------- opening / resetting the memo ---------- */
     function resetMemoToggle () {
         $('#message-text').val('').hide();
