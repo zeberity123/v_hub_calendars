@@ -824,9 +824,33 @@ $(document).ready(async function() {
     -------------------------------------------------- */
     function linkify (text) {
         if (!text) return '';
+      
+        /* grab every http/https URL */
         const urlRE = /(https?:\/\/[^\s]+)/gi;
-        return text.replace(urlRE,
-            '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+      
+        return text.replace(urlRE, function (url) {
+          /* strip query/hash before testing the extension */
+          const clean = url.split(/[?#]/)[0].toLowerCase();
+      
+          /* list of image extensions you care about */
+          const imgRE = /\.(png|jpe?g|gif|bmp|webp|svg)$/;
+      
+          /* choose the label */
+          const label = imgRE.test(clean) ? '[IMAGE_PREVIEW]' : url;
+      
+          /* build the anchor */
+          return `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+        });
+    }
+    /* --------------------------------------------------
+    insert text at the current caret position
+    -------------------------------------------------- */
+    function insertTextAtCaret (ta, text) {
+        const start = ta.selectionStart;
+        const end   = ta.selectionEnd;
+        ta.value = ta.value.slice(0, start) + text + ta.value.slice(end);
+        const pos = start + text.length;
+        ta.setSelectionRange(pos, pos);
     }
 
     /* ---------- quick helpers ---------- */
@@ -907,15 +931,39 @@ $(document).ready(async function() {
 
     /* keep preview live while typing */
     $(document).on('input', '#message-text', function () {
-    /* auto-grow textarea */
-    this.style.height = 'auto';
-    this.style.height = this.scrollHeight + 'px';
+        /* auto-grow textarea */
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
 
-    /* keep preview in sync (for when user blurs) */
-    const $preview = $('#memoPreview');
-    $preview.html(linkify(this.value));
-    $preview[0].style.height = 'auto';
-    $preview[0].style.height = $preview[0].scrollHeight + 'px';
+        /* keep preview in sync (for when user blurs) */
+        const $preview = $('#memoPreview');
+        $preview.html(linkify(this.value));
+        $preview[0].style.height = 'auto';
+        $preview[0].style.height = $preview[0].scrollHeight + 'px';
+    });
+    /* --------------------------------------------------
+    allow “Copy image” → paste URL in #message-text
+    -------------------------------------------------- */
+    $(document).on('paste', '#message-text', function (evt) {
+        const cd = evt.originalEvent.clipboardData;
+        if (!cd) return;                         // very old browsers
+    
+        /* grab the HTML fragment (if any) */
+        const html = cd.getData('text/html');
+        if (!html) return;                       // no HTML → let browser handle
+    
+        /* look for <img … src="…"> */
+        const holder = document.createElement('div');
+        holder.innerHTML = html;
+        const img = holder.querySelector('img');
+        if (!img || !img.src) return;            // none found → let browser handle
+    
+        /* we *did* find a src — prevent default paste and inject the URL */
+        evt.preventDefault();
+        insertTextAtCaret(this, img.src);
+    
+        /* keep the live-preview in sync */
+        $(this).trigger('input');
     });
 
     /* ---------- opening / resetting the memo ---------- */
