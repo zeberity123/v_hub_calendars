@@ -29,6 +29,7 @@ def calendar_create(request):
     end_day = __convert_day_format(request.data['end_day'])
     start_time = __convert_time_display(request.data['start_time'])
     end_time = __convert_time_display(request.data['end_time'])
+    pinned = request.data.get('pinned', '')
     
     calendar_obj = Calendar(
         title=title, 
@@ -38,7 +39,8 @@ def calendar_create(request):
         start_day=start_day, 
         end_day=end_day, 
         start_time=start_time, 
-        end_time=end_time
+        end_time=end_time,
+        pinned=pinned
     )
     calendar_obj.save()
 
@@ -82,6 +84,7 @@ def calendar_update(request, pk):
     event.content = request.data.get('content', event.content)
     event.color = request.data.get('color', event.color)
     event.tags = request.data.get('tags', event.tags)
+    event.pinned = request.data.get('pinned', event.pinned)
     
     # Process subtasks data if provided (as a JSON string)
     subtasks_data = request.data.get('subtasks', '[]')

@@ -115,6 +115,17 @@ a:hover {
   background: #673AB7;
   color: #fff; }
 
+/* Style for month view todo items with full event details for truncating long titles */
+.monthly-calendar .event.event-start.event-end, .monthly-calendar .event-start.event-consecutive, .monthly-calendar .event-end.event-consecutive {
+  display: inline-block;
+  /* margin-left: 2px;
+  margin-right:2px; */
+  /* padding-left: 4px;
+  padding-right: 4px; */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .week-day {
   display: grid;
@@ -149,7 +160,7 @@ a:hover {
       position: relative;
       margin: 0;
       padding: 8px 16px;
-      text-align: right;
+      text-align: center;
       font-size: 12px;
       line-height: 1.5;
       box-sizing: border-box;
@@ -207,6 +218,13 @@ a:hover {
   .daily-calendar:hover {
     cursor: pointer; }
 
+    
+.day-label.today-label{
+  background:#44576C; 
+  color:#fff !important;         
+  /* border-radius:15%;   */
+}
+
 .modal .modal-header {
   background: #F7F7FB; }
 .modal label {
@@ -221,7 +239,17 @@ a:hover {
 .modal .form-row .form-check-inline {
   align-items: baseline; }
 
-
+/* give visual feedback when pinned */
+#pinToggle.active{
+  /* background:#FFCA28; */
+  background: #5a6777;
+  color:#fff;
+}
+/* .daily-calendar .event.pinned,
+.daily-calendar .event-consecutive.pinned {
+    outline: 2px solid #44576C;
+    border: 2px solid #44576C;
+} */
 /* New styles for color selector circles with min dimensions */
 .color-circle {
     display: inline-block;
@@ -252,81 +280,81 @@ a:hover {
 .grid-dday,
 .grid-tags,
 .grid-date-range {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding: 2px 5px;
-    border-right: 1px solid rgba(255, 255, 255);
-    text-align: left;
-    min-width: 0; /* Important for text truncation */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 2px 5px;
+  border-right: 1px solid rgba(255, 255, 255);
+  text-align: left;
+  min-width: 0; /* Important for text truncation */
 }
 
 .grid-title {
-    font-weight: bold;
-    min-width: 5ch; /* Minimum width for title */
+  font-weight: bold;
+  min-width: 5ch; /* Minimum width for title */
 }
 
 .grid-summary {
-    color: rgba(255, 255, 255);
-    min-width: 5ch; /* Minimum width for summary */
+  color: rgba(255, 255, 255);
+  min-width: 5ch; /* Minimum width for summary */
 }
 
 .grid-dday {
-    color: rgba(255, 255, 255);
-    min-width: 5ch; /* Minimum width for d-day */
+  color: rgba(255, 255, 255);
+  min-width: 5ch; /* Minimum width for d-day */
 }
 
 .grid-date-range {
-    color: rgba(255, 255, 255);
-    /* font-size: 0.9em; */
-    min-width: 12ch; /* Minimum width for dates */
+  color: rgba(255, 255, 255);
+  /* font-size: 0.9em; */
+  min-width: 12ch; /* Minimum width for dates */
 }
 
 /* Ensure the event container can handle the grid layout */
 .event,
 .event-consecutive {
-    padding: 5px;
-    /* margin: 2px 0; */
-    /* margin-top: 1px; */
-    display: flex;
-    align-items: center;
-    height: 32px; /* Fixed height for consistency */
+  padding: 5px;
+  /* margin: 2px 0; */
+  /* margin-top: 1px; */
+  display: flex;
+  align-items: center;
+  height: 32px; /* Fixed height for consistency */
 }
 
 .event:hover,
 .event-consecutive:hover {
-    transform: scale(1.01);
-    transition: transform 0.1s ease;
+  transform: scale(1.01);
+  transition: transform 0.1s ease;
 }
 
 /* Ensure consistent height for all todo items in daily view */
 .daily-calendar > .event,
 .daily-calendar > .event-consecutive,
 .daily-calendar > .event-repeated {
-    height: 40px !important;
+  height: 40px !important;
 }
 
 /* Force daily view todo items to have a consistent height */
 .daily-calendar .event,
 .daily-calendar .event-consecutive,
 .daily-calendar .event-repeated {
-    height: 40px !important;
-    min-height: 40px !important;
-    line-height: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  line-height: 40px !important;
 }
 
 /* Hide scrollbar for .daily-calendar */
 .daily-calendar::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 .daily-calendar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 /* Remove border-right for .grid-tags */
 .grid-tags {
-    border-right: none !important;
+  border-right: none !important;
 }
 #toggleMemo   { text-decoration:none; }
 #memoChevron  { font-weight:bold; }
@@ -339,18 +367,6 @@ a:hover {
 /* arrow points down when memo is open */
 #toggleMemo.open .material-icons {
   transform: rotate(90deg);
-}
-
-/* Style for month view todo items with full event details for truncating long titles */
-.monthly-calendar .event.event-start.event-end {
-  display: inline-block;
-  margin-left: 2px;
-  margin-right:2px;
-  /* padding-left: 4px;
-  padding-right: 4px; */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* let the preview box expand naturally */

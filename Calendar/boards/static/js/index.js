@@ -4,6 +4,7 @@ $(document).ready(async function() {
     var toggle_d_day_status = true;
     var toggle_sort_mode = true;
     // 현재날짜 저장
+    let pinnedStatus = false;
     var currentDate = new Date();
     var currentDate_daily = new Date();
 
@@ -167,9 +168,10 @@ $(document).ready(async function() {
                 endTS,                   // 13
                 totalSubtasks ? doneSubtasks/totalSubtasks : 1, // 14
                 res.title,               // 15
-                res.tags                 // 16
+                res.tags,                // 16
+                !!res.pinned             // 17
             ];
-            event_arr.push(res.subtasks || []); // 17
+            event_arr.push(res.subtasks || []);     // 18
 
             // ------------------------------------------------------------
             // 3️⃣  Store under the *visible* key
@@ -180,6 +182,17 @@ $(document).ready(async function() {
         })
         // html에 띄우는 작업
         $('#div-list').append(cal);
+        /* ----------------------------------------------------
+        Highlight today (only if it is in the current month)
+        ---------------------------------------------------- */
+        (function markToday(){
+            const now      = new Date();                           // today
+            const idToday  = pad(now.getMonth()+1) + '-'           // "05-01-2025"
+                        + pad(now.getDate())   + '-'
+                        +  now.getFullYear();
+        
+            $('#' + idToday).addClass('today-label');              // <- CSS does the rest
+        })();
         $('#months').text(details.months[d.getMonth()]);
         $('#year').text(d.getFullYear());
         $('td.day').mouseover(function() {
@@ -192,18 +205,21 @@ $(document).ready(async function() {
         var day_cal = ['7', '6', '5', '4', '3', '2', '1']
         for (var key in d_startdate) {
             d_startdate[key].sort(function(a, b) {
+                if (a[17] !== b[17]) return  a[17] - b[17];   //  pinned=true first
                 if (toggle_sort_mode) {  // sort by start_date
                     if (a[12] !== b[12]) return b[12] - a[12];
                     else if (a[13] !== b[13]) return b[13] - a[13];
                     else if (a[14] !== b[14]) return b[14] - a[14];
                     else {
-                        return a[15].localeCompare(b[15]);
+                        return b[15].localeCompare(a[15]);
                     }
                 } else {  // sort by end_date
                     if (a[13] !== b[13]) return b[13] - a[13];
                     else if (a[12] !== b[12]) return b[12] - a[12];
                     else if (a[14] !== b[14]) return [14] - a[14];
-                    else return a[15].localeCompare(b[15]);
+                    else {
+                        return b[15].localeCompare(a[15]);
+                    }
                 }
             });
         }
@@ -220,8 +236,9 @@ $(document).ready(async function() {
                         end_time: res[7],
                         content: res[8],
                         color: res[11],
-                        subtasks: res[17],
-                        tags: res[16]
+                        subtasks: res[18],
+                        tags: res[16],
+                        pinned: res[17]
                     }
                     
                     if (Number(res[0]) > Number(day_cal[res[2]])) {
@@ -257,7 +274,7 @@ $(document).ready(async function() {
     
                         }
 
-                        var s_new_date_data = [Number(res[0]) - Number(day_cal[res[2]]), res[1], 0, true, res[4], res[5], res[6], res[7], res[8], res[9], res[10], res[11], res[12], res[13], res[14], res[15], res[16], res[17]]
+                        var s_new_date_data = [Number(res[0]) - Number(day_cal[res[2]]), res[1], 0, true, res[4], res[5], res[6], res[7], res[8], res[9], res[10], res[11], res[12], res[13], res[14], res[15], res[16], res[18], res[17]]
                         if (s_new_date in d_startdate) {
                             d_startdate[s_new_date].push(s_new_date_data)
                         } else {
@@ -296,6 +313,9 @@ $(document).ready(async function() {
                     console.error('Failed to parse event data:', err);
                 }
             }
+            pinnedStatus = !!eventData.pinned;
+            $('#pinToggle').toggleClass('active', pinnedStatus)
+                           .attr('aria-pressed', pinnedStatus);
             // Clear existing subtasks
             $('#subtasksContainer').empty();
             if (eventData) {
@@ -327,6 +347,9 @@ $(document).ready(async function() {
                     
                         $('#subtasksContainer').append($row);
                     });
+                    $('#subtasksContainer .subtask-item').each(function () {
+                        enterPreview( $(this) );
+                    });
                 }
                 updateSubtaskProgress();
                 // Store the event ID for update/delete operations
@@ -338,7 +361,6 @@ $(document).ready(async function() {
         // 달력클릭시 일정작성 폼이 나옴
         $(document).on('click', '.week', function (e) {
             console.log(e)
-       
             /* ---------------------------------------------------------
                Which column inside this .week was clicked?
                --------------------------------------------------------- */
@@ -374,6 +396,7 @@ $(document).ready(async function() {
             $('#registerSchedule')
                 .removeData('eventId')
                 .modal('show');
+            $('#pinToggle').removeClass('active').attr('aria-pressed', false);
         });
         generateDaily(d_daily)
     }
@@ -453,34 +476,26 @@ $(document).ready(async function() {
                     var endTS = eventEnd.getTime();
                     var subtaskRatio = (totalSubtasks > 0) ? (completedSubtasks / totalSubtasks) : 1;
                     var html = "";
-
+                var brief_res_dict = {
+                    id: res. id,
+                    title: res.title,
+                    start_day: res.start_day,
+                    end_day: res.end_day,
+                    start_time: res.start_time,
+                    end_time: res.end_time,
+                    content: res.content,
+                    color: res.color,
+                    subtasks: res.subtasks,
+                    pinned: res.pinned
+                }
                 if (res.start_day === res.end_day) {
-                        html = `<div class="event event-start event-end" style="background-color: ${res.color}; color:#fff;" data-event='${JSON.stringify(res.raw || {
-                            id: res. id,
-                            title: res.title,
-                            start_day: res.start_day,
-                            end_day: res.end_day,
-                            start_time: res.start_time,
-                            end_time: res.end_time,
-                            content: res.content,
-                            color: res.color,
-                            subtasks: res.subtasks
-                        })}'>${titleWithSummary}</div>`;
+                        html = `<div class="event event-start event-end" style="background-color: ${res.color}; color:#fff;" data-event="${safeDataEvent(brief_res_dict)}">${titleWithSummary}</div>`;
                 } else {
-                        html = `<div class="event-consecutive event-start event-end" style="background-color: ${res.color}; color:#fff;" data-event='${JSON.stringify(res.raw || {
-                            id: res.id,
-                            title: res.title,
-                            start_day: res.start_day,
-                            end_day: res.end_day,
-                            start_time: res.start_time,
-                            end_time: res.end_time,
-                            content: res.content,
-                            color: res.color,
-                            subtasks: res.subtasks
-                        })}'>${titleWithSummary}</div>`;
+                        html = `<div class="event-consecutive event-start event-end" style="background-color: ${res.color}; color:#fff;" data-event="${safeDataEvent(brief_res_dict)}">${titleWithSummary}</div>`;
                     }
 
                     uniqueEvents[res.id] = {
+                        pinned : !!res.pinned,
                         sortStart: startTS,
                         sortEnd: endTS,
                         ratio: subtaskRatio,
@@ -493,11 +508,15 @@ $(document).ready(async function() {
 
         var eventsList = Object.values(uniqueEvents);
         eventsList.sort(function(a, b) {
+            // disabled pinned first temporarily
+            if (a.pinned !== b.pinned) return  b.pinned - a.pinned;
             if (toggle_sort_mode) {
                 if (a.sortEnd !== b.sortEnd) return a.sortEnd - b.sortEnd;
                 else if (a.sortStart !== b.sortStart) return a.sortStart - b.sortStart;
                 else if (a.ratio !== b.ratio) return a.ratio - b.ratio;
-                else return a.origTitle.localeCompare(b.origTitle);
+                else {
+                    return a.origTitle.localeCompare(b.origTitle);
+                }
             } else {
                 if (a.sortStart !== b.sortStart) return a.sortStart - b.sortStart;
                 else if (a.sortEnd !== b.sortEnd) return a.sortEnd - b.sortEnd;
@@ -518,6 +537,16 @@ $(document).ready(async function() {
             $('#months').text(d_daily.getMonth() + 1);   // 1 – 12
             $('#year').text(d_daily.getFullYear());
         }
+        $('#day .event, #day .event-consecutive').each(function () {
+            let data = $(this).data('event');
+            if (typeof data === 'string') {         // stored as JSON string
+                try { data = JSON.parse(data); }    // → parse it
+                catch(e) { return; }                // malformed – skip
+            }
+            if (data && data.pinned) {              // the flag you store
+                $(this).addClass('pinned');         // add the CSS hook
+            }
+        });
     }
 
     // -- modal form subtasks --
@@ -628,6 +657,13 @@ $(document).ready(async function() {
         $(this).addClass('selected');
     });
 
+    /* pin button click */
+    $(document).on('click', '#pinToggle', function () {
+        pinnedStatus = !pinnedStatus;
+        $(this).toggleClass('active')
+            .attr('aria-pressed', pinnedStatus);
+    });
+
     // Delegated event: Save (create/update) button
     $(document).on('click', '#create', async function() {
         const data = new FormData();
@@ -648,6 +684,7 @@ $(document).ready(async function() {
         data.append('subtasks', JSON.stringify(subtasks));
         // Append the tags from the tag input field
         data.append('tags', $('#todoTags').val());
+        data.append('pinned', pinnedStatus ? 'True' : 'False');
         
         const eventId = $('#registerSchedule').data('eventId');
         if (eventId) {
@@ -821,9 +858,33 @@ $(document).ready(async function() {
     -------------------------------------------------- */
     function linkify (text) {
         if (!text) return '';
+      
+        /* grab every http/https URL */
         const urlRE = /(https?:\/\/[^\s]+)/gi;
-        return text.replace(urlRE,
-            '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+      
+        return text.replace(urlRE, function (url) {
+          /* strip query/hash before testing the extension */
+          const clean = url.split(/[?#]/)[0].toLowerCase();
+      
+          /* list of image extensions you care about */
+          const imgRE = /\.(png|jpe?g|gif|bmp|webp|svg)$/;
+      
+          /* choose the label */
+          const label = imgRE.test(clean) ? '[IMAGE_PREVIEW]' : url;
+      
+          /* build the anchor */
+          return `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+        });
+    }
+    /* --------------------------------------------------
+    insert text at the current caret position
+    -------------------------------------------------- */
+    function insertTextAtCaret (ta, text) {
+        const start = ta.selectionStart;
+        const end   = ta.selectionEnd;
+        ta.value = ta.value.slice(0, start) + text + ta.value.slice(end);
+        const pos = start + text.length;
+        ta.setSelectionRange(pos, pos);
     }
 
     /* ---------- quick helpers ---------- */
@@ -904,17 +965,41 @@ $(document).ready(async function() {
 
     /* keep preview live while typing */
     $(document).on('input', '#message-text', function () {
-    /* auto-grow textarea */
-    this.style.height = 'auto';
-    this.style.height = this.scrollHeight + 'px';
+        /* auto-grow textarea */
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
 
-    /* keep preview in sync (for when user blurs) */
-    const $preview = $('#memoPreview');
-    $preview.html(linkify(this.value));
-    $preview[0].style.height = 'auto';
-    $preview[0].style.height = $preview[0].scrollHeight + 'px';
+        /* keep preview in sync (for when user blurs) */
+        const $preview = $('#memoPreview');
+        $preview.html(linkify(this.value));
+        $preview[0].style.height = 'auto';
+        $preview[0].style.height = $preview[0].scrollHeight + 'px';
     });
-
+    /* --------------------------------------------------
+    allow “Copy image” → paste URL in #message-text
+    -------------------------------------------------- */
+    $(document).on('paste', '#message-text', function (evt) {
+        const cd = evt.originalEvent.clipboardData;
+        if (!cd) return;                         // very old browsers
+    
+        /* grab the HTML fragment (if any) */
+        const html = cd.getData('text/html');
+        if (!html) return;                       // no HTML → let browser handle
+    
+        /* look for <img … src="…"> */
+        const holder = document.createElement('div');
+        holder.innerHTML = html;
+        const img = holder.querySelector('img');
+        if (!img || !img.src) return;            // none found → let browser handle
+    
+        /* we *did* find a src — prevent default paste and inject the URL */
+        evt.preventDefault();
+        insertTextAtCaret(this, img.src);
+    
+        /* keep the live-preview in sync */
+        $(this).trigger('input');
+    });
+    
     /* ---------- opening / resetting the memo ---------- */
     function resetMemoToggle () {
         $('#message-text').val('').hide();
@@ -956,9 +1041,6 @@ $(document).ready(async function() {
             }
         );
     });
-    $('#subtasksContainer .subtask-item').each(function () {
-        enterPreview( $(this) );
-      });
 });
 
 String.prototype.replaceAll = function(org, dest) {
