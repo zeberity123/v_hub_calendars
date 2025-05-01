@@ -467,31 +467,21 @@ $(document).ready(async function() {
                     var endTS = eventEnd.getTime();
                     var subtaskRatio = (totalSubtasks > 0) ? (completedSubtasks / totalSubtasks) : 1;
                     var html = "";
-
+                var brief_res_dict = {
+                    id: res. id,
+                    title: res.title,
+                    start_day: res.start_day,
+                    end_day: res.end_day,
+                    start_time: res.start_time,
+                    end_time: res.end_time,
+                    content: res.content,
+                    color: res.color,
+                    subtasks: res.subtasks
+                }
                 if (res.start_day === res.end_day) {
-                        html = `<div class="event event-start event-end" style="background-color: ${res.color}; color:#fff;" data-event='${JSON.stringify(res.raw || {
-                            id: res. id,
-                            title: res.title,
-                            start_day: res.start_day,
-                            end_day: res.end_day,
-                            start_time: res.start_time,
-                            end_time: res.end_time,
-                            content: res.content,
-                            color: res.color,
-                            subtasks: res.subtasks
-                        })}'>${titleWithSummary}</div>`;
+                        html = `<div class="event event-start event-end" style="background-color: ${res.color}; color:#fff;" data-event="${safeDataEvent(brief_res_dict)}">${titleWithSummary}</div>`;
                 } else {
-                        html = `<div class="event-consecutive event-start event-end" style="background-color: ${res.color}; color:#fff;" data-event='${JSON.stringify(res.raw || {
-                            id: res.id,
-                            title: res.title,
-                            start_day: res.start_day,
-                            end_day: res.end_day,
-                            start_time: res.start_time,
-                            end_time: res.end_time,
-                            content: res.content,
-                            color: res.color,
-                            subtasks: res.subtasks
-                        })}'>${titleWithSummary}</div>`;
+                        html = `<div class="event-consecutive event-start event-end" style="background-color: ${res.color}; color:#fff;" data-event="${safeDataEvent(brief_res_dict)}">${titleWithSummary}</div>`;
                     }
 
                     uniqueEvents[res.id] = {

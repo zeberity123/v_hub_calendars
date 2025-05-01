@@ -239,7 +239,11 @@ a:hover {
 .modal .form-row .form-check-inline {
   align-items: baseline; }
 
-
+/* give visual feedback when pinned */
+#pinToggle.active{
+  background:#FFCA28;        /* amber */
+  color:#fff;
+}
 /* New styles for color selector circles with min dimensions */
 .color-circle {
     display: inline-block;
