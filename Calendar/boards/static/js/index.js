@@ -205,13 +205,12 @@ $(document).ready(async function() {
         var day_cal = ['7', '6', '5', '4', '3', '2', '1']
         for (var key in d_startdate) {
             d_startdate[key].sort(function(a, b) {
-                if (a[17] !== b[17]) return  b[17] - a[17];   //  pinned=true first
+                if (a[17] !== b[17]) return  a[17] - b[17];   //  pinned=true first
                 if (toggle_sort_mode) {  // sort by start_date
                     if (a[12] !== b[12]) return b[12] - a[12];
                     else if (a[13] !== b[13]) return b[13] - a[13];
                     else if (a[14] !== b[14]) return b[14] - a[14];
                     else {
-                        console.log(b[15], a[15])
                         return b[15].localeCompare(a[15]);
                     }
                 } else {  // sort by end_date
@@ -219,7 +218,6 @@ $(document).ready(async function() {
                     else if (a[12] !== b[12]) return b[12] - a[12];
                     else if (a[14] !== b[14]) return [14] - a[14];
                     else {
-                        console.log(b[15], a[15])
                         return b[15].localeCompare(a[15]);
                     }
                 }
