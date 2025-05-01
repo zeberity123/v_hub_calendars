@@ -180,6 +180,17 @@ $(document).ready(async function() {
         })
         // html에 띄우는 작업
         $('#div-list').append(cal);
+        /* ----------------------------------------------------
+        Highlight today (only if it is in the current month)
+        ---------------------------------------------------- */
+        (function markToday(){
+            const now      = new Date();                           // today
+            const idToday  = pad(now.getMonth()+1) + '-'           // "05-01-2025"
+                        + pad(now.getDate())   + '-'
+                        +  now.getFullYear();
+        
+            $('#' + idToday).addClass('today-label');              // <- CSS does the rest
+        })();
         $('#months').text(details.months[d.getMonth()]);
         $('#year').text(d.getFullYear());
         $('td.day').mouseover(function() {

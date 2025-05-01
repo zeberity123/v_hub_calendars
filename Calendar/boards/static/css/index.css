@@ -118,8 +118,8 @@ a:hover {
 /* Style for month view todo items with full event details for truncating long titles */
 .monthly-calendar .event.event-start.event-end, .monthly-calendar .event-start.event-consecutive, .monthly-calendar .event-end.event-consecutive {
   display: inline-block;
-  margin-left: 2px;
-  margin-right:2px;
+  /* margin-left: 2px;
+  margin-right:2px; */
   /* padding-left: 4px;
   padding-right: 4px; */
   white-space: nowrap;
@@ -160,7 +160,7 @@ a:hover {
       position: relative;
       margin: 0;
       padding: 8px 16px;
-      text-align: right;
+      text-align: center;
       font-size: 12px;
       line-height: 1.5;
       box-sizing: border-box;
@@ -217,6 +217,13 @@ a:hover {
 }
   .daily-calendar:hover {
     cursor: pointer; }
+
+    
+.day-label.today-label{
+  background:#44576C; 
+  color:#fff !important;         
+  /* border-radius:15%;   */
+}
 
 .modal .modal-header {
   background: #F7F7FB; }
