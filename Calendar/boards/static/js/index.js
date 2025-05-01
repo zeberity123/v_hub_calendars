@@ -485,7 +485,8 @@ $(document).ready(async function() {
                     end_time: res.end_time,
                     content: res.content,
                     color: res.color,
-                    subtasks: res.subtasks
+                    subtasks: res.subtasks,
+                    pinned: res.pinned
                 }
                 if (res.start_day === res.end_day) {
                         html = `<div class="event event-start event-end" style="background-color: ${res.color}; color:#fff;" data-event="${safeDataEvent(brief_res_dict)}">${titleWithSummary}</div>`;
@@ -536,6 +537,16 @@ $(document).ready(async function() {
             $('#months').text(d_daily.getMonth() + 1);   // 1 – 12
             $('#year').text(d_daily.getFullYear());
         }
+        $('#day .event, #day .event-consecutive').each(function () {
+            let data = $(this).data('event');
+            if (typeof data === 'string') {         // stored as JSON string
+                try { data = JSON.parse(data); }    // → parse it
+                catch(e) { return; }                // malformed – skip
+            }
+            if (data && data.pinned) {              // the flag you store
+                $(this).addClass('pinned');         // add the CSS hook
+            }
+        });
     }
 
     // -- modal form subtasks --
