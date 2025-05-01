@@ -327,6 +327,9 @@ $(document).ready(async function() {
                     
                         $('#subtasksContainer').append($row);
                     });
+                    $('#subtasksContainer .subtask-item').each(function () {
+                        enterPreview( $(this) );
+                    });
                 }
                 updateSubtaskProgress();
                 // Store the event ID for update/delete operations
@@ -956,9 +959,6 @@ $(document).ready(async function() {
             }
         );
     });
-    $('#subtasksContainer .subtask-item').each(function () {
-        enterPreview( $(this) );
-      });
 });
 
 String.prototype.replaceAll = function(org, dest) {

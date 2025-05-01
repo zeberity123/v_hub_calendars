@@ -115,6 +115,17 @@ a:hover {
   background: #673AB7;
   color: #fff; }
 
+/* Style for month view todo items with full event details for truncating long titles */
+.monthly-calendar .event.event-start.event-end, .monthly-calendar .event-start.event-consecutive, .monthly-calendar .event-end.event-consecutive {
+  display: inline-block;
+  margin-left: 2px;
+  margin-right:2px;
+  /* padding-left: 4px;
+  padding-right: 4px; */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .week-day {
   display: grid;
@@ -339,18 +350,6 @@ a:hover {
 /* arrow points down when memo is open */
 #toggleMemo.open .material-icons {
   transform: rotate(90deg);
-}
-
-/* Style for month view todo items with full event details for truncating long titles */
-.monthly-calendar .event.event-start.event-end {
-  display: inline-block;
-  margin-left: 2px;
-  margin-right:2px;
-  /* padding-left: 4px;
-  padding-right: 4px; */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* let the preview box expand naturally */
