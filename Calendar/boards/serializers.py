@@ -11,4 +11,4 @@ class CalendarSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Calendar
-        fields = ['id', 'title', 'content', 'tags', 'color', 'start_day', 'end_day', 'start_time', 'end_time', 'subtasks']
+        fields = ['id', 'title', 'content', 'tags', 'color', 'start_day', 'end_day', 'start_time', 'end_time', 'subtasks', 'pinned']
