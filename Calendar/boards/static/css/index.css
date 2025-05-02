@@ -82,8 +82,16 @@ a:hover {
   
 /* make the search bar visually blend with the header buttons */
 #todoSearch .form-control,
-#todoSearch .custom-select { height: 36px; }
-
+#todoSearch .custom-select { 
+  height: 42px; 
+}
+#todoSearch .input-group-prepend{
+  margin-right: 4px;
+}
+#todoSearch .form-control{
+  margin-right: -4px;
+  border-radius: 4px;
+}
 .monthly-calendar .day-name, .daily-calendar .day-name {
   font-size: 14px;
   line-height: 1.5;
