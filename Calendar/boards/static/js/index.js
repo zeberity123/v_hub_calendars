@@ -7,7 +7,7 @@ $(document).ready(async function() {
     let pinnedStatus = false;
     /* ---------- search state ---------- */
     let currentSearchText  = '';       // what the user typed
-    let currentSearchField = 'all';    // selected dropdown option
+    let currentSearchField = 'title';    // selected dropdown option
     var currentDate = new Date();
     var currentDate_daily = new Date();
 
@@ -1002,11 +1002,12 @@ $(document).ready(async function() {
                 case 'tags'    : hit = tags    .includes(txt);           break;
                 case 'subtasks': hit = subtasks.includes(txt);           break;
                 case 'content' : hit = content .includes(txt);           break;
-                case 'all'     :
-                default        : hit = title.includes(txt) ||
+                case 'all'     : hit = title.includes(txt) ||
                                 tags.includes(txt)  ||
                                 content.includes(txt)  ||
-                                subtasks.includes(txt);
+                                subtasks.includes(txt)
+                                break;
+                default        : title   .includes(txt);
             }
 
             $(this).toggleClass('d-none', !hit);   // hide if no match
