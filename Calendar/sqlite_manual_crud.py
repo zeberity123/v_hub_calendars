@@ -6,7 +6,7 @@ cursor = conn.cursor()
 
 # Define the SQL statement with a parameter placeholder
 
-for i in range(34,35):
+for i in range(54, 55):
     try:
         # Execute the SQL command using a parameterized query to safely inject the value
         sql_delete = "DELETE FROM boards_calendar WHERE id = ?"
