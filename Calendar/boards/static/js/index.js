@@ -5,6 +5,9 @@ $(document).ready(async function() {
     var toggle_sort_mode = true;
     // 현재날짜 저장
     let pinnedStatus = false;
+    /* ---------- search state ---------- */
+    let currentSearchText  = '';       // what the user typed
+    let currentSearchField = 'all';    // selected dropdown option
     var currentDate = new Date();
     var currentDate_daily = new Date();
 
@@ -399,6 +402,7 @@ $(document).ready(async function() {
             $('#pinToggle').removeClass('active').attr('aria-pressed', false);
         });
         generateDaily(d_daily)
+        filterTodos();    // keep current search in effect        
     }
     //day_view
     async function generateDaily(d_daily) {
@@ -486,6 +490,7 @@ $(document).ready(async function() {
                     content: res.content,
                     color: res.color,
                     subtasks: res.subtasks,
+                    tags: res.tags,
                     pinned: res.pinned
                 }
                 if (res.start_day === res.end_day) {
@@ -812,6 +817,17 @@ $(document).ready(async function() {
         generateCalendar(currentDate, currentDate_daily);
     });
 
+    /* ---------- search input listeners ---------- */
+    $(document).on('input',  '#searchInput', function () {
+        currentSearchText = this.value;
+        filterTodos();
+    });
+    $(document).on('change', '#searchField', function () {
+        currentSearchField = this.value;
+        filterTodos();
+    });
+
+
     // New delegated event: Remove subtask row when '-' button is clicked
     $(document).on('click', '.remove-subtask', function() {
         $(this).closest('.subtask-item').remove();
@@ -936,6 +952,65 @@ $(document).ready(async function() {
         pre.selectNodeContents(el);
         pre.setEnd(range.endContainer, range.endOffset);
         return pre.toString().length;
+    }
+
+    /* -------------------------------------------------------------
+    Hide / show todos in both month‑ and day‑views
+    ------------------------------------------------------------- */
+    function filterTodos () {
+        const txt   = currentSearchText.trim().toLowerCase();
+        const field = currentSearchField;          // "all" | "title" | …
+
+        /* nothing typed  →  show everything & return */
+        if (!txt) {
+            $('.event, .event-consecutive, .event-repeated')
+                .removeClass('d-none');
+            return;
+        }
+
+        $('.event, .event-consecutive, .event-repeated').each(function () {
+            let data = $(this).data('event');
+            if (typeof data === 'string') {             // stored as JSON string
+                try   { data = JSON.parse(data); }
+                catch { return; }                       // malformed → show?
+            }
+
+            /* collect candidate strings */
+            const title    = (data.title    || '').toLowerCase();
+            const tags     = (data.tags     || '').toLowerCase();
+            const content     = (data.content  || '').toLowerCase();
+            let subtasksArr = [];
+
+            if (Array.isArray(data.subtasks)) {
+                subtasksArr = data.subtasks;                  // ← normal case
+            } else if (typeof data.subtasks === 'string') {
+                try {                                         // ← maybe it's a JSON string
+                    const parsed = JSON.parse(data.subtasks);
+                    if (Array.isArray(parsed)) subtasksArr = parsed;
+                } catch { /* ignore – leave empty */ }
+            }
+
+            const subtasks = subtasksArr
+                            .map(st => st.text || '')        // guard missing .text
+                            .join(' ')
+                            .toLowerCase();
+
+            /* decide */
+            let hit = false;
+            switch (field) {
+                case 'title'   : hit = title   .includes(txt);           break;
+                case 'tags'    : hit = tags    .includes(txt);           break;
+                case 'subtasks': hit = subtasks.includes(txt);           break;
+                case 'content' : hit = content .includes(txt);           break;
+                case 'all'     :
+                default        : hit = title.includes(txt) ||
+                                tags.includes(txt)  ||
+                                content.includes(txt)  ||
+                                subtasks.includes(txt);
+            }
+
+            $(this).toggleClass('d-none', !hit);   // hide if no match
+        });
     }
 
     /* ---------- click & blur logic ---------- */

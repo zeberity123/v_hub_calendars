@@ -1,12 +1,12 @@
 import sqlite3
 
 # Connect to the SQLite database file
-conn = sqlite3.connect("calendardb.sqlite3")
+conn = sqlite3.connect("calendardb_rd.sqlite3")
 cursor = conn.cursor()
 
 # Define the SQL statement with a parameter placeholder
 
-for i in range(34,35):
+for i in range(43, 44):
     try:
         # Execute the SQL command using a parameterized query to safely inject the value
         sql_delete = "DELETE FROM boards_calendar WHERE id = ?"
