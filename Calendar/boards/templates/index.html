@@ -32,7 +32,27 @@
             <span id="year"> </span>년
             &nbsp;
             <span id="months"> </span>월
+
+  
             <ul class="nav nav-tabs view-tab" id="view" role="tablist">
+                <!-- 🔍 search ---------------------------------------------------->
+                <div id="todoSearch" class="input-group mr-2" style="width:200px;">
+                    <div class="input-group-prepend">
+                    <select id="searchField" class="custom-select">
+                        <option value="all"       selected>전체</option>
+                        <option value="title">제목</option>
+                        <option value="subtasks">할 일</option>
+                        <option value="memo">메모</option>
+                        <option value="tags">태그</option>
+                    </select>
+                    </div>
+                
+                    <input id="searchInput"
+                        type="text"
+                        class="form-control"
+                        placeholder="">
+                </div>
+                <!-- /🔍 search --------------------------------------------------->
                 <li class="nav-item">
                     <button id="toggleSummary" class="btn btn-light" style="padding: .5rem 1rem; margin-right: auto; -webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px; ">D-Day</button>
                 </li>

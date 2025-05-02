@@ -79,7 +79,11 @@ a:hover {
       color: #fff;
       background-color: #44576C;
       border-color: #D7E2EB; }
-     
+  
+/* make the search bar visually blend with the header buttons */
+#todoSearch .form-control,
+#todoSearch .custom-select { height: 36px; }
+
 .monthly-calendar .day-name, .daily-calendar .day-name {
   font-size: 14px;
   line-height: 1.5;
