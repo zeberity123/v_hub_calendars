@@ -1121,25 +1121,44 @@ $(document).ready(async function() {
         );
     });
 
-    /* --------------------------------------------------
-    D‑Day → 자동으로 종료 날짜 채우기
-    -------------------------------------------------- */
-    $(document).on('click', '#applyDDay', function () {
-        /* ① 읽어온다:  D-숫자  */
-        const days = parseInt( $('#dDayInput').val(), 10 );
-        if (isNaN(days)) return;                       // 숫자가 아님 → 무시
+    /* -------------------------------------------------------------
+    1. helper that really does the job
+    ----------------------------------------------------------------*/
+    function applyDDay () {
+        const delta = parseInt($('#dDayInput').val(), 10);   // days to add
+        if (isNaN(delta)) return;                           // nothing typed
 
-        /* ② 시작 날짜가 있어야 계산 가능 */
-        const startRaw = $('#start-day').val();        // ‘05/08/2025’ 같은 ‘L’ 형식
-        if (!startRaw) return;
+        const start = $('#start-day').val();                // "MM-DD-YYYY"
+        if (!start) return;
 
-        /* ③ moment 로 파싱 후 days 만큼 더한다 */
-        const start = moment(startRaw, 'L');           // ‘L’ = locale short date
-        const end   = start.clone().add(days, 'days');
+        const [m, d, y] = start.split('-').map(Number);
+        const endDate   = new Date(y, m - 1, d);
+        endDate.setDate(endDate.getDate() + delta);
 
-        /* ④ 종료 날짜 입력란에 써넣는다 */
-        $('#end-day').val( end.format('L') );
-    });
+        /* keep the MM‑DD‑YYYY format */
+        const pad = n => (n < 10 ? '0' : '') + n;
+        $('#end-day').val(
+            `${pad(endDate.getMonth()+1)}-${pad(endDate.getDate())}-${endDate.getFullYear()}`
+        );
+    }
+
+    /* -------------------------------------------------------------
+    2. existing button → keep it working
+    ----------------------------------------------------------------*/
+    $('#applyDDay').on('click', applyDDay);
+
+    /* -------------------------------------------------------------
+    3. NEW: run the same logic when the field loses focus
+        or when the user presses Enter while typing
+    ----------------------------------------------------------------*/
+    $('#dDayInput')
+        .on('blur',       applyDDay)            // click outside
+        .on('keypress', function (e) {          // press Enter inside
+            if (e.key === 'Enter') {
+                e.preventDefault();             // stop form submit
+                this.blur();                    // triggers the blur‑handler
+            }
+        });
     /* --------------------------------------------------
     시작/종료 날짜 ➟ D‑Day 입력값 동기화
     -------------------------------------------------- */
@@ -1159,12 +1178,33 @@ $(document).ready(async function() {
         const diff  = end.diff(start, 'days');
         $('#dDayInput').val( diff >= 0 ? diff : 0 );
     }
-    // $('#datetimepicker1, #datetimepicker3').datetimepicker({
-    //     locale:  'ko',            // month / weekday names in Korean
-    //     format:  'MM-DD-YYYY',    // value that goes into the <input>
-    //     dayViewHeaderFormat: 'YYYY년 MMMM',   // (optional) big header
-    //     useCurrent: false         // don’t auto‑fill the second picker
-    // });
+    /* -------------------------------------------------------------
+    ①  recalc the D‑Day input from #start-day  ➜  #end-day
+    ----------------------------------------------------------------*/
+    function syncDDayFromEnd () {
+        const s = $('#start-day').val();   // "MM-DD-YYYY"
+        const e = $('#end-day'  ).val();
+        if (!s || !e) return;              // not both set yet
+
+        const toParts = str => str.split('-').map(Number);
+        const [sm, sd, sy] = toParts(s);
+        const [em, ed, ey] = toParts(e);
+
+        const start = new Date(sy, sm - 1, sd);
+        const end   = new Date(ey, em - 1, ed);
+
+        const diff  = Math.round((end - start) / 864e5);   // ms → days
+        $('#dDayInput').val(diff >= 0 ? diff : 0);         // never negative
+    }
+
+    /* -------------------------------------------------------------
+    ②  fire it whenever the *end* field really changes
+    ----------------------------------------------------------------*/
+    /* a) user picks a date from the popup calendar                */
+    $('#datetimepicker3').on('change.datetimepicker', syncDDayFromEnd);
+
+    /* b) user types / pastes directly into the input box          */
+    $('#end-day').on('change blur', syncDDayFromEnd);
 
 });
 
