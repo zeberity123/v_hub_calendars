@@ -160,11 +160,17 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="col-form-label">일정 시작 시간</label>
-                                <div class="input-group date" id="datetimepicker2" data-target-input="nearest">
-                                    <input type="text" name="start_time" id="start-time" class="form-control datetimepicker-input" data-target="#datetimepicker2"/>
-                                    <div class="input-group-append" data-target="#datetimepicker2" data-toggle="datetimepicker">
-                                        <div class="input-group-text"><i class="material-icons">access_time</i></div>
+                                <label for="dDayInput">마감일&nbsp;D‑Day&nbsp;설정</label>
+                                <div class="input-group" id="dDayPicker">
+                                    <input type="number" min="0" step="1"
+                                           class="form-control"
+                                           id="dDayInput"
+                                           placeholder="D‑일수 입력">
+                                    <div class="input-group-append">
+                                        <!-- press ➟ apply -->
+                                        <button type="button" class="input-group-text" id="applyDDay">
+                                            <i class="material-icons">schedule</i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>

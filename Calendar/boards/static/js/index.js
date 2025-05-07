@@ -1118,6 +1118,26 @@ $(document).ready(async function() {
             }
         );
     });
+
+    /* --------------------------------------------------
+    D‑Day → 자동으로 종료 날짜 채우기
+    -------------------------------------------------- */
+    $(document).on('click', '#applyDDay', function () {
+        /* ① 읽어온다:  D-숫자  */
+        const days = parseInt( $('#dDayInput').val(), 10 );
+        if (isNaN(days)) return;                       // 숫자가 아님 → 무시
+
+        /* ② 시작 날짜가 있어야 계산 가능 */
+        const startRaw = $('#start-day').val();        // ‘05/08/2025’ 같은 ‘L’ 형식
+        if (!startRaw) return;
+
+        /* ③ moment 로 파싱 후 days 만큼 더한다 */
+        const start = moment(startRaw, 'L');           // ‘L’ = locale short date
+        const end   = start.clone().add(days, 'days');
+
+        /* ④ 종료 날짜 입력란에 써넣는다 */
+        $('#end-day').val( end.format('L') );
+    });
 });
 
 String.prototype.replaceAll = function(org, dest) {
@@ -1163,10 +1183,10 @@ $(function () {
 });
 
 $(function () {
-    $('#datetimepicker2').datetimepicker({
-        locale : 'ko',
-        format : 'LT'    // (= localised “h:mm A” style)
-    });
+    // $('#datetimepicker2').datetimepicker({
+    //     locale : 'ko',
+    //     format : 'LT'    // (= localised “h:mm A” style)
+    // });
     
     $('#datetimepicker4').datetimepicker({
         locale : 'ko',
