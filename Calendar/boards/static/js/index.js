@@ -1151,19 +1151,26 @@ $(function () {
 
 $(function () {
     $('#datetimepicker1').datetimepicker({
-        format: 'L'
+        locale : 'ko',   // ① Monday = 월, …, month names in Korean
+        format : 'L'     // ② your original "05/27/2025" short‑date format
     });
+    
     $('#datetimepicker3').datetimepicker({
-        format: 'L'
+        locale : 'ko',
+        format : 'L'
     });
+    
 });
 
 $(function () {
     $('#datetimepicker2').datetimepicker({
-        format: 'LT'
+        locale : 'ko',
+        format : 'LT'    // (= localised “h:mm A” style)
     });
+    
     $('#datetimepicker4').datetimepicker({
-        format: 'LT'
+        locale : 'ko',
+        format : 'LT'
     });
 });
 
