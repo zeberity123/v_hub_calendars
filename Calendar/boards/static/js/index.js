@@ -185,6 +185,7 @@ $(document).ready(async function() {
         })
         // html에 띄우는 작업
         $('#div-list').append(cal);
+        $('#div-list [data-toggle="tooltip"]').tooltip();
         /* ----------------------------------------------------
         Highlight today (only if it is in the current month)
         ---------------------------------------------------- */
@@ -248,15 +249,15 @@ $(document).ready(async function() {
                         // console.log(`remain_date(0):${res[0]}`, `starting_week(2):${res[2]}`, `day_cal:${day_cal[res[2]]}`, `name:${res[15]}`, `is_con(9):${res[9]}`, `flag(3):${res[3]}`)
                         if (res[9]) {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             }
                         } else {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             }
                         }
 
@@ -287,15 +288,15 @@ $(document).ready(async function() {
                         // console.log(`eeeelse(0):${res[0]}`, `starting_week(2):${res[2]}`, `day_cal:${day_cal[res[2]]}`, `name:${res[15]}`, `is_con:${res[9]}`, `flag:${res[3]}`)
                         if (res[9]) {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             }
                         } else {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             }
                         }
                     }
@@ -326,6 +327,7 @@ $(document).ready(async function() {
                 $('#recipient-name').val(eventData.title);
                 $('#start-day').val(eventData.start_day);
                 $('#end-day').val(eventData.end_day);
+                syncDDayInput();
                 $('#start-time').val(eventData.start_time);
                 $('#end-time').val(eventData.end_time);
                 // $('#message-text').val(eventData.content);
@@ -390,6 +392,7 @@ $(document).ready(async function() {
                 .val('');
             $('#start-day').val(cutdate);
             $('#end-day').val(cutdate);
+            syncDDayInput();
             $('#subtasksContainer').empty();
             updateSubtaskProgress();
         
@@ -1117,6 +1120,92 @@ $(document).ready(async function() {
             }
         );
     });
+
+    /* -------------------------------------------------------------
+    1. helper that really does the job
+    ----------------------------------------------------------------*/
+    function applyDDay () {
+        const delta = parseInt($('#dDayInput').val(), 10);   // days to add
+        if (isNaN(delta)) return;                           // nothing typed
+
+        const start = $('#start-day').val();                // "MM-DD-YYYY"
+        if (!start) return;
+
+        const [m, d, y] = start.split('-').map(Number);
+        const endDate   = new Date(y, m - 1, d);
+        endDate.setDate(endDate.getDate() + delta);
+
+        /* keep the MM‑DD‑YYYY format */
+        const pad = n => (n < 10 ? '0' : '') + n;
+        $('#end-day').val(
+            `${pad(endDate.getMonth()+1)}-${pad(endDate.getDate())}-${endDate.getFullYear()}`
+        );
+    }
+
+    /* -------------------------------------------------------------
+    2. existing button → keep it working
+    ----------------------------------------------------------------*/
+    $('#applyDDay').on('click', applyDDay);
+
+    /* -------------------------------------------------------------
+    3. NEW: run the same logic when the field loses focus
+        or when the user presses Enter while typing
+    ----------------------------------------------------------------*/
+    $('#dDayInput')
+        .on('blur',       applyDDay)            // click outside
+        .on('keypress', function (e) {          // press Enter inside
+            if (e.key === 'Enter') {
+                e.preventDefault();             // stop form submit
+                this.blur();                    // triggers the blur‑handler
+            }
+        });
+    /* --------------------------------------------------
+    시작/종료 날짜 ➟ D‑Day 입력값 동기화
+    -------------------------------------------------- */
+    function syncDDayInput () {
+        const startVal = $('#start-day').val();
+        const endVal   = $('#end-day').val();
+
+        if (!startVal || !endVal) {          // 날짜가 비어 있으면 0
+            $('#dDayInput').val(0);
+            return;
+        }
+
+        /* diff in days (moment respects locale ‘L’ format) */
+        const start = moment(startVal, 'L');
+        const end   = moment(endVal  , 'L');
+
+        const diff  = end.diff(start, 'days');
+        $('#dDayInput').val( diff >= 0 ? diff : 0 );
+    }
+    /* -------------------------------------------------------------
+    ①  recalc the D‑Day input from #start-day  ➜  #end-day
+    ----------------------------------------------------------------*/
+    function syncDDayFromEnd () {
+        const s = $('#start-day').val();   // "MM-DD-YYYY"
+        const e = $('#end-day'  ).val();
+        if (!s || !e) return;              // not both set yet
+
+        const toParts = str => str.split('-').map(Number);
+        const [sm, sd, sy] = toParts(s);
+        const [em, ed, ey] = toParts(e);
+
+        const start = new Date(sy, sm - 1, sd);
+        const end   = new Date(ey, em - 1, ed);
+
+        const diff  = Math.round((end - start) / 864e5);   // ms → days
+        $('#dDayInput').val(diff >= 0 ? diff : 0);         // never negative
+    }
+
+    /* -------------------------------------------------------------
+    ②  fire it whenever the *end* field really changes
+    ----------------------------------------------------------------*/
+    /* a) user picks a date from the popup calendar                */
+    $('#datetimepicker3').on('change.datetimepicker', syncDDayFromEnd);
+
+    /* b) user types / pastes directly into the input box          */
+    $('#end-day').on('change blur', syncDDayFromEnd);
+
 });
 
 String.prototype.replaceAll = function(org, dest) {
@@ -1149,20 +1238,33 @@ $(function () {
 });
 
 $(function () {
-    $('#datetimepicker1').datetimepicker({
-        format: 'L'
+    // $('#datetimepicker1').datetimepicker({
+    //     locale : 'ko',   // ① Monday = 월, …, month names in Korean
+    //     format : 'L'     // ② your original "05/27/2025" short‑date format
+    // });
+    
+    // $('#datetimepicker3').datetimepicker({
+    //     locale : 'ko',
+    //     format : 'L'
+    // });
+    $('#datetimepicker1, #datetimepicker3').datetimepicker({
+        locale:  'ko',            // month / weekday names in Korean
+        format:  'MM-DD-YYYY',    // value that goes into the <input>
+        dayViewHeaderFormat: 'YYYY년 MMMM',   // (optional) big header
+        useCurrent: false         // don’t auto‑fill the second picker
     });
-    $('#datetimepicker3').datetimepicker({
-        format: 'L'
-    });
+    
 });
 
 $(function () {
-    $('#datetimepicker2').datetimepicker({
-        format: 'LT'
-    });
+    // $('#datetimepicker2').datetimepicker({
+    //     locale : 'ko',
+    //     format : 'LT'    // (= localised “h:mm A” style)
+    // });
+    
     $('#datetimepicker4').datetimepicker({
-        format: 'LT'
+        locale : 'ko',
+        format : 'LT'
     });
 });
 

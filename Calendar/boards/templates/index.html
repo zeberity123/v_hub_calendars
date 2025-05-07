@@ -84,7 +84,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js" ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.1/js/tempusdominus-bootstrap-4.min.js" ></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
@@ -160,11 +160,17 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="col-form-label">일정 시작 시간</label>
-                                <div class="input-group date" id="datetimepicker2" data-target-input="nearest">
-                                    <input type="text" name="start_time" id="start-time" class="form-control datetimepicker-input" data-target="#datetimepicker2"/>
-                                    <div class="input-group-append" data-target="#datetimepicker2" data-toggle="datetimepicker">
-                                        <div class="input-group-text"><i class="material-icons">access_time</i></div>
+                                <label for="dDayInput">마감일&nbsp;D‑Day&nbsp;설정</label>
+                                <div class="input-group" id="dDayPicker">
+                                    <input type="number" min="0" step="1"
+                                           class="form-control"
+                                           id="dDayInput"
+                                           placeholder="D‑일수 입력">
+                                    <div class="input-group-append">
+                                        <!-- press ➟ apply -->
+                                        <button type="button" class="input-group-text" id="applyDDay">
+                                            <i class="material-icons">pets</i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
