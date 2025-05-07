@@ -327,6 +327,7 @@ $(document).ready(async function() {
                 $('#recipient-name').val(eventData.title);
                 $('#start-day').val(eventData.start_day);
                 $('#end-day').val(eventData.end_day);
+                syncDDayInput();
                 $('#start-time').val(eventData.start_time);
                 $('#end-time').val(eventData.end_time);
                 // $('#message-text').val(eventData.content);
@@ -391,6 +392,7 @@ $(document).ready(async function() {
                 .val('');
             $('#start-day').val(cutdate);
             $('#end-day').val(cutdate);
+            syncDDayInput();
             $('#subtasksContainer').empty();
             updateSubtaskProgress();
         
@@ -1138,6 +1140,32 @@ $(document).ready(async function() {
         /* ④ 종료 날짜 입력란에 써넣는다 */
         $('#end-day').val( end.format('L') );
     });
+    /* --------------------------------------------------
+    시작/종료 날짜 ➟ D‑Day 입력값 동기화
+    -------------------------------------------------- */
+    function syncDDayInput () {
+        const startVal = $('#start-day').val();
+        const endVal   = $('#end-day').val();
+
+        if (!startVal || !endVal) {          // 날짜가 비어 있으면 0
+            $('#dDayInput').val(0);
+            return;
+        }
+
+        /* diff in days (moment respects locale ‘L’ format) */
+        const start = moment(startVal, 'L');
+        const end   = moment(endVal  , 'L');
+
+        const diff  = end.diff(start, 'days');
+        $('#dDayInput').val( diff >= 0 ? diff : 0 );
+    }
+    // $('#datetimepicker1, #datetimepicker3').datetimepicker({
+    //     locale:  'ko',            // month / weekday names in Korean
+    //     format:  'MM-DD-YYYY',    // value that goes into the <input>
+    //     dayViewHeaderFormat: 'YYYY년 MMMM',   // (optional) big header
+    //     useCurrent: false         // don’t auto‑fill the second picker
+    // });
+
 });
 
 String.prototype.replaceAll = function(org, dest) {
@@ -1170,14 +1198,20 @@ $(function () {
 });
 
 $(function () {
-    $('#datetimepicker1').datetimepicker({
-        locale : 'ko',   // ① Monday = 월, …, month names in Korean
-        format : 'L'     // ② your original "05/27/2025" short‑date format
-    });
+    // $('#datetimepicker1').datetimepicker({
+    //     locale : 'ko',   // ① Monday = 월, …, month names in Korean
+    //     format : 'L'     // ② your original "05/27/2025" short‑date format
+    // });
     
-    $('#datetimepicker3').datetimepicker({
-        locale : 'ko',
-        format : 'L'
+    // $('#datetimepicker3').datetimepicker({
+    //     locale : 'ko',
+    //     format : 'L'
+    // });
+    $('#datetimepicker1, #datetimepicker3').datetimepicker({
+        locale:  'ko',            // month / weekday names in Korean
+        format:  'MM-DD-YYYY',    // value that goes into the <input>
+        dayViewHeaderFormat: 'YYYY년 MMMM',   // (optional) big header
+        useCurrent: false         // don’t auto‑fill the second picker
     });
     
 });
