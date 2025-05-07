@@ -185,6 +185,7 @@ $(document).ready(async function() {
         })
         // html에 띄우는 작업
         $('#div-list').append(cal);
+        $('#div-list [data-toggle="tooltip"]').tooltip();
         /* ----------------------------------------------------
         Highlight today (only if it is in the current month)
         ---------------------------------------------------- */
@@ -248,15 +249,15 @@ $(document).ready(async function() {
                         // console.log(`remain_date(0):${res[0]}`, `starting_week(2):${res[2]}`, `day_cal:${day_cal[res[2]]}`, `name:${res[15]}`, `is_con(9):${res[9]}`, `flag(3):${res[3]}`)
                         if (res[9]) {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             }
                         } else {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start" style="background-color: ${res[11]}; color:#fff;" data-span="${day_cal[res[2]]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             }
                         }
 
@@ -287,15 +288,15 @@ $(document).ready(async function() {
                         // console.log(`eeeelse(0):${res[0]}`, `starting_week(2):${res[2]}`, `day_cal:${day_cal[res[2]]}`, `name:${res[15]}`, `is_con:${res[9]}`, `flag:${res[3]}`)
                         if (res[9]) {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end event-consecutive" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             }
                         } else {
                             if (res[3]) {
-                                $(`#${date_list[i]}`).after(`<div class="event event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             } else {
-                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}">${res[1]}</div>`);
+                                $(`#${date_list[i]}`).after(`<div class="event event-start event-end" style="background-color: ${res[11]}; color:#fff;" data-span="${res[0]}" data-event="${safeDataEvent(brief_res_dict)}" data-toggle="tooltip" title="${escapeAttr(res[1])}">${res[1]}</div>`);
                             }
                         }
                     }
