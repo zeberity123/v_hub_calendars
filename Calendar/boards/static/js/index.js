@@ -787,16 +787,16 @@ $(document).ready(async function() {
     });
 
     // modal에 하루종일 클릭시 시간설정 막음
-    $('#inlineCheckbox2').click(function() {
-        if ($('#inlineCheckbox2').is(":checked")) {
-            $('[name="start_time"]').attr("readonly", true);
-            $('[name="end_time"]').attr("readonly", true);
-        } else {
-            $('[name="start_time"]').attr("readonly", false);
-            $('[name="end_time"]').attr("readonly", false);
-        }
+    // $('#inlineCheckbox2').click(function() {
+    //     if ($('#inlineCheckbox2').is(":checked")) {
+    //         $('[name="start_time"]').attr("readonly", true);
+    //         $('[name="end_time"]').attr("readonly", true);
+    //     } else {
+    //         $('[name="start_time"]').attr("readonly", false);
+    //         $('[name="end_time"]').attr("readonly", false);
+    //     }
 
-    });
+    // });
     generateCalendar(currentDate, currentDate_daily);
 
     // Toggle between d-day view and end date view when clicking the newly added button.

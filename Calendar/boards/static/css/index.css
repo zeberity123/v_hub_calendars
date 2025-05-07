@@ -248,8 +248,8 @@ a:hover {
   @media (max-width: 767px) {
     .modal label {
       font-size: 13px; } }
-.modal .form-row .form-check-inline {
-  align-items: baseline; }
+/* .modal .form-row .form-check-inline {
+  align-items: baseline; } */
 
 /* give visual feedback when pinned */
 #pinToggle.active{
